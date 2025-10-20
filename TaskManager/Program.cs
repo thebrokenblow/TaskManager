@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Data;
+using TaskManager.Queries;
+using TaskManager.Queries.Interfaces;
 using TaskManager.Repositories;
 using TaskManager.Repositories.Interfaces;
 
@@ -14,6 +16,10 @@ builder.Services.AddDbContext<TaskManagerDbContext>(options =>
                                 options.UseNpgsql(connectionString));
 
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
+
+builder.Services.AddScoped<IDocumentQuery, DocumentQuery>();
+
 
 var app = builder.Build();
 
@@ -32,7 +38,7 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Employee}/{action=Index}/{id?}")
+    pattern: "{controller=Document}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 app.Run();
