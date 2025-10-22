@@ -8,7 +8,22 @@
     {
         throw new Exception();
     }
+
+    var isReadOnly = Model.LoginAuthor != Environment.UserName;
 }
+
+<style>
+    .readonly-disabled {
+        background-color: #e9ecef;
+        opacity: 1;
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+
+    .readonly-disabled::placeholder {
+        color: #6c757d;
+     }
+</style>
 
 <!-- Форма редактирования документа -->
 <div class="card mb-4 mt-5">
@@ -18,6 +33,7 @@
     <div class="card-body">
         <form method="post" asp-action="Edit" class="row g-3">
             <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="LoginAuthor" />
 
             <!-- Исходные данные документа -->
             <div class="col-12">
@@ -27,30 +43,66 @@
             <div class="col-md-4">
                 <div class="d-flex align-items-center gap-2">
                     <label class="form-label mb-0">Исх.</label>
-                    <input type="text" class="form-control" asp-for="SourceOutgoingDocumentNumber" required>
+                    @if (isReadOnly)
+                    {
+                        <input type="text" class="form-control readonly-disabled" asp-for="SourceOutgoingDocumentNumber" readonly>
+                    }
+                    else
+                    {
+                        <input type="text" class="form-control" asp-for="SourceOutgoingDocumentNumber" required>
+                    }
                 </div>
             </div>
 
             <div class="col-md-4">
-                <input type="date" class="form-control" asp-for="SourceOutgoingDocumentDate" required>
+                @if (isReadOnly)
+                {
+                    <input type="date" class="form-control readonly-disabled" asp-for="SourceOutgoingDocumentDate" readonly>
+                }
+                else
+                {
+                    <input type="date" class="form-control" asp-for="SourceOutgoingDocumentDate" required>
+                }
             </div>
 
             <div class="col-md-4">
                 <div class="d-flex align-items-center gap-2">
                     <label class="form-label mb-0">Заказчик</label>
-                    <input type="text" class="form-control" asp-for="SourceCustomer" required>
+                    @if (isReadOnly)
+                    {
+                        <input type="text" class="form-control readonly-disabled" asp-for="SourceCustomer" readonly>
+                    }
+                    else
+                    {
+                        <input type="text" class="form-control" asp-for="SourceCustomer" required>
+                    }
                 </div>
             </div>
 
             <div class="col-12">
-                <textarea class="form-control" asp-for="SourceTaskText" rows="3" required></textarea>
+                @if (isReadOnly)
+                {
+                    <textarea class="form-control readonly-disabled" asp-for="SourceTaskText" rows="3" readonly></textarea>
+                }
+                else
+                {
+                    <textarea class="form-control" asp-for="SourceTaskText" rows="3" required></textarea>
+                }
             </div>
 
             <div class="col-12">
                 <div class="row align-items-center g-3">
                     <div class="col-auto">
                         <div class="form-check">
-                            <input class="form-check-input" asp-for="SourceIsExternal" />
+                            @if (isReadOnly)
+                            {
+                                <input class="form-check-input readonly-disabled" asp-for="SourceIsExternal" readonly>
+                                <input type="hidden" asp-for="SourceIsExternal" />
+                            }
+                            else
+                            {
+                                <input class="form-check-input" asp-for="SourceIsExternal">
+                            }
                             <label class="form-check-label" asp-for="SourceIsExternal">
                                 Внешний документ
                             </label>
@@ -60,18 +112,39 @@
                     <div class="col">
                         <div class="d-flex align-items-center gap-2">
                             <label class="form-label mb-0" style="min-width: 30px;">Вх.</label>
-                            <input type="text" class="form-control" asp-for="SourceOutputDocumentNumber" required>
+                            @if (isReadOnly)
+                            {
+                                <input type="text" class="form-control readonly-disabled" asp-for="SourceOutputDocumentNumber" readonly>
+                            }
+                            else
+                            {
+                                <input type="text" class="form-control" asp-for="SourceOutputDocumentNumber" required>
+                            }
                         </div>
                     </div>
 
                     <div class="col">
-                        <input type="date" class="form-control" asp-for="SourceOutputDocumentDate" required>
+                        @if (isReadOnly)
+                        {
+                            <input type="date" class="form-control readonly-disabled" asp-for="SourceOutputDocumentDate" readonly>
+                        }
+                        else
+                        {
+                            <input type="date" class="form-control" asp-for="SourceOutputDocumentDate" required>
+                        }
                     </div>
 
                     <div class="col">
                         <div class="d-flex align-items-center gap-2">
                             <label class="form-label mb-0" style="min-width: 120px;">Выполнить до</label>
-                            <input type="date" class="form-control" asp-for="SourceDueDate" required>
+                            @if (isReadOnly)
+                            {
+                                <input type="date" class="form-control readonly-disabled" asp-for="SourceDueDate" readonly>
+                            }
+                            else
+                            {
+                                <input type="date" class="form-control" asp-for="SourceDueDate" required>
+                            }
                         </div>
                     </div>
                 </div>
@@ -80,12 +153,24 @@
             <div class="col-12">
                 <div class="d-flex align-items-center gap-1">
                     <label class="form-label" style="min-width: 215px;">Ответственный сотрудник</label>
-                    <select asp-for="SourceResponsibleEmployeeId"
-                            class="form-control"
-                            asp-items="selecListEmployees"
-                            required>
-                        <option value="">Выберите сотрудника</option>
-                    </select>
+                    @if (isReadOnly)
+                    {
+                        <select asp-for="SourceResponsibleEmployeeId"
+                                class="form-control readonly-disabled"
+                                asp-items="selecListEmployees"
+                                readonly>
+                            <option value="">Выберите сотрудника</option>
+                        </select>
+                        <input type="hidden" asp-for="SourceResponsibleEmployeeId" />
+                    }
+                    else
+                    {
+                        <select asp-for="SourceResponsibleEmployeeId"
+                                class="form-control"
+                                asp-items="selecListEmployees">
+                            <option value="">Выберите сотрудника</option>
+                        </select>
+                    }
                 </div>
             </div>
 

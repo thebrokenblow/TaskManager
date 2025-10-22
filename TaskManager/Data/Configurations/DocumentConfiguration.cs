@@ -19,12 +19,14 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
         builder
             .Property(document => document.SourceOutgoingDocumentNumber)
             .IsRequired()
-            .HasColumnName("source_outgoing_document_number");
+            .HasColumnName("source_outgoing_document_number")
+            .HasMaxLength(100);
 
         builder
             .Property(document => document.SourceOutgoingDocumentDate)
             .IsRequired()
-            .HasColumnName("source_outgoing_document_date");
+            .HasColumnName("source_outgoing_document_date")
+            .HasColumnType("date");
 
         builder
             .Property(document => document.SourceCustomer)
@@ -38,6 +40,7 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
 
         builder
             .Property(document => document.SourceIsExternal)
+            .IsRequired()
             .HasColumnName("source_is_external");
 
         builder
@@ -48,12 +51,14 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
         builder
             .Property(document => document.SourceOutputDocumentDate)
             .IsRequired()
-            .HasColumnName("source_output_document_date");
+            .HasColumnName("source_output_document_date")
+            .HasColumnType("date");
 
         builder
             .Property(document => document.SourceDueDate)
             .IsRequired()
-            .HasColumnName("source_due_date");
+            .HasColumnName("source_due_date")
+            .HasColumnType("date");
 
         builder
             .Property(document => document.SourceResponsibleEmployeeId)
@@ -75,7 +80,8 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
             .Property(document => document.OutputOutgoingDate)
             .HasColumnName("output_outgoing_date");
 
-        builder.Property(document => document.OutputSentTo)
+        builder
+            .Property(document => document.OutputSentTo)
             .HasColumnName("output_sent_to");
 
         builder
@@ -88,6 +94,25 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
 
         builder
             .Property(document => document.IsUnderControl)
+            .IsRequired()
             .HasColumnName("is_under_control");
+
+        builder
+            .Property(document => document.IsCompleted)
+            .IsRequired()
+            .HasColumnName("is_completed");
+
+        builder
+            .Property(document => document.LoginAuthor)
+            .IsRequired()
+            .HasColumnName("login_author");
+
+        builder
+            .Property(document => document.AuthorRemoveDocument)
+            .HasColumnName("author_remove_document");
+
+        builder
+            .Property(document => document.DateRemove)
+            .HasColumnName("date_remove");
     }
 }

@@ -12,7 +12,7 @@ using TaskManager.Data;
 namespace TaskManager.Migrations
 {
     [DbContext(typeof(TaskManagerDbContext))]
-    [Migration("20251017122816_Init")]
+    [Migration("20251022131002_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -34,9 +34,26 @@ namespace TaskManager.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AuthorRemoveDocument")
+                        .HasColumnType("text")
+                        .HasColumnName("author_remove_document");
+
+                    b.Property<DateTime?>("DateRemove")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_remove");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_completed");
+
                     b.Property<bool>("IsUnderControl")
                         .HasColumnType("boolean")
                         .HasColumnName("is_under_control");
+
+                    b.Property<string>("LoginAuthor")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("login_author");
 
                     b.Property<DateOnly?>("OutputOutgoingDate")
                         .HasColumnType("date")
@@ -77,7 +94,8 @@ namespace TaskManager.Migrations
 
                     b.Property<string>("SourceOutgoingDocumentNumber")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("source_outgoing_document_number");
 
                     b.Property<DateOnly>("SourceOutputDocumentDate")
@@ -127,6 +145,25 @@ namespace TaskManager.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("employees", (string)null);
+                });
+
+            modelBuilder.Entity("TaskManager.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("password");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("TaskManager.Models.Document", b =>

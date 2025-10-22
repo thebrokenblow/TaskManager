@@ -3,8 +3,56 @@
 
 @{
     ViewData["Title"] = "Документы";
+
     var statusInactiveButton = "disabled";
-    var pageSizeItems = new List<int> { 10, 25, 50, 75, 100 };
+    var pageSizeItems = new List<int> { 25, 50, 75, 100 };
+
+    var loginAuthor = Environment.UserName;
+}
+
+@functions {
+    private const int OverdueDay = 0;
+    private const int WarningDay = 3;
+    private const int NormalDay = 7;
+
+    private const string TableDanger = "table-danger";
+    private const string TableWarning = "table-warning";
+    private const string TableSuccess = "table-success";
+    private const string FontWeightBold = "fw-bold";
+
+
+    public string GetRowClass(FilteredRangeDocument document)
+    {
+        var currentDate = DateOnly.FromDateTime(DateTime.Now);
+        int daysUntilDue = document.SourceDueDate.DayNumber - currentDate.DayNumber;
+
+        if (daysUntilDue <= OverdueDay)
+        {
+            return TableDanger;
+        }
+
+        if (daysUntilDue <= WarningDay)
+        {
+            return TableWarning;
+        }
+
+        if (daysUntilDue <= NormalDay)
+        {
+            return TableSuccess;
+        }
+
+        return string.Empty;
+    }
+
+    public string IsSpecialDocument(FilteredRangeDocument document)
+    {
+        if (document.IsUnderControl)
+        {
+            return FontWeightBold;
+        }
+
+        return string.Empty;
+    }
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -65,17 +113,21 @@
         <tbody>
             @foreach (var document in Model.Documents)
             {
-                <tr>
-                    <td>@document.SourceOutgoingDocumentNumber</td>
-                    <td>@document.SourceOutputDocumentNumber</td>
-                    <td>@document.SourceTaskText</td>
-                    <td>@document.SourceDueDate</td>
-                    <td>@document.SourceResponsibleEmployee.FullName</td>
-                    <td>@document.OutputOutgoingNumber</td>
-                    <td>@document.OutputOutgoingDate</td>
+                <tr class="@GetRowClass(document)">
+                    <td class="@IsSpecialDocument(document)">@document.SourceOutgoingDocumentNumber</td>
+                    <td class="@IsSpecialDocument(document)">@document.SourceOutputDocumentNumber</td>
+                    <td class="@IsSpecialDocument(document)">@document.SourceTaskText</td>
+                    <td class="@IsSpecialDocument(document)">@document.SourceDueDate</td>
+                    <td class="@IsSpecialDocument(document)">@document.SourceResponsibleEmployee.FullName</td>
+                    <td class="@IsSpecialDocument(document)">@document.OutputOutgoingNumber</td>
+                    <td class="@IsSpecialDocument(document)">@document.OutputOutgoingDate</td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@document.Id">Редактировать</a> |
-                        <a asp-action="Delete" asp-route-id="@document.Id">Удалить</a>
+                        <a asp-action="Edit" asp-route-id="@document.Id" class="text-decoration-none">Редактировать</a>
+
+                        @if (document.LoginAuthor == loginAuthor)
+                        {
+                            <a asp-action="Delete" asp-route-id="@document.Id" class="text-decoration-none">Удалить</a>
+                        }
                     </td>
                 </tr>
             }

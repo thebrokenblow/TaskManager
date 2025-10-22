@@ -55,4 +55,15 @@ public class FilteredRangeDocument
     /// Дата исходящего документа из выходных данных
     /// </summary>
     public required DateOnly? OutputOutgoingDate { get; set; }
+
+    /// <summary>
+    /// Признак нахождения задачи на контроле
+    /// </summary>
+    public bool IsUnderControl { get; set; }
+
+    /// <summary>
+    /// Логин автора задания
+    /// Обязательное поле
+    /// </summary>
+    public required string LoginAuthor { get; set; }
 }

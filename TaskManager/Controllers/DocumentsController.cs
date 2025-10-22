@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using TaskManager.Models;
-using TaskManager.Queries;
 using TaskManager.Queries.Interfaces;
 using TaskManager.Repositories.Interfaces;
 using TaskManager.ViewModel;
@@ -14,7 +13,7 @@ public class DocumentsController(
         IEmployeeRepository employeeRepository) : Controller
 {
     private const int defaultNumberPage = 1;
-    private const int defaultCountDocumentsOnPage = 10;
+    private const int defaultCountDocumentsOnPage = 25;
 
     [HttpGet]
     public async Task<IActionResult> Index(
@@ -66,6 +65,8 @@ public class DocumentsController(
     [HttpPost]
     public async Task<IActionResult> Create(Document document)
     {
+        document.LoginAuthor = Environment.UserName;
+
         await documentRepository.AddAsync(document);
         return RedirectToAction(nameof(Index));
     }

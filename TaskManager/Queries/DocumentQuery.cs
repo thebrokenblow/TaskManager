@@ -23,25 +23,27 @@ public class DocumentQuery(TaskManagerDbContext context) : IDocumentQuery
                                         document.SourceTaskText.Contains(inputSearch));
         }
 
+        queryDocuments = queryDocuments.Where(document => !document.IsCompleted);
+
         var countDocuments = await queryDocuments.CountAsync();
 
-        var documents = await queryDocuments.Select(document => new FilteredRangeDocument
+        var documents = await queryDocuments.OrderBy(document => document.SourceDueDate)
+                                            .ThenBy(document => document.IsUnderControl)
+                                            .Select(document => new FilteredRangeDocument
                                             {
                                                 Id = document.Id,
                                                 SourceOutgoingDocumentNumber = document.SourceOutgoingDocumentNumber,
                                                 SourceTaskText = document.SourceTaskText,
                                                 SourceOutputDocumentNumber = document.SourceOutputDocumentNumber,
                                                 SourceDueDate = document.SourceDueDate,
+                                                IsUnderControl = document.IsUnderControl,
                                                 OutputOutgoingDate = document.OutputOutgoingDate,
+                                                LoginAuthor = document.LoginAuthor,
                                                 OutputOutgoingNumber = document.OutputOutgoingNumber,
                                                 SourceResponsibleEmployeeId = document.SourceResponsibleEmployeeId,
                                                 SourceResponsibleEmployee = document.SourceResponsibleEmployee!
                                             })
                                             .AsNoTracking()
-                                            .OrderBy(document => document.SourceOutgoingDocumentNumber)
-                                            .ThenBy(document => document.SourceOutputDocumentNumber)
-                                            .ThenBy(document => document.SourceDueDate)
-                                            .ThenBy(document => document.SourceResponsibleEmployee.FullName)
                                             .Skip(countSkip)
                                             .Take(countTake)
                                             .ToListAsync();

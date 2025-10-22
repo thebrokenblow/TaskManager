@@ -40,7 +40,7 @@ public class Document
     /// <summary>
     /// Признак внешнего документа из исходных данных
     /// </summary>
-    public bool SourceIsExternal { get; set; }
+    public required bool SourceIsExternal { get; set; }
 
     /// <summary>
     /// Номер выходящего документа (output) из исходных данных
@@ -61,13 +61,13 @@ public class Document
     public required DateOnly SourceDueDate { get; set; }
 
     /// <summary>
-    /// Идентификатор ответственного сотрудника из исходных данных
+    /// Идентификатор ответственного сотрудника
     /// Обязательное поле
     /// </summary>
-    public int SourceResponsibleEmployeeId { get; set; }
+    public required int SourceResponsibleEmployeeId { get; set; }
 
     /// <summary>
-    /// Ответственный сотрудник из исходных данных
+    /// Ответственный сотрудник
     /// </summary>
     public Employee? SourceResponsibleEmployee { get; set; }
 
@@ -99,7 +99,28 @@ public class Document
     public string? OutputResponseSubmissionMark { get; set; }
 
     /// <summary>
-    /// Признак нахождения документа на контроле
+    /// Признак нахождения задачи на контроле
     /// </summary>
     public bool IsUnderControl { get; set; }
+
+    /// <summary>
+    /// Признак завершения задачи
+    /// </summary>
+    public bool IsCompleted { get; set; }
+
+    /// <summary>
+    /// Логин автора задания
+    /// Обязательное поле
+    /// </summary>
+    public required string LoginAuthor { get; set; }
+
+    /// <summary>
+    /// Автор, удаливший документ
+    /// </summary>
+    public string? AuthorRemoveDocument { get; set; }
+
+    /// <summary>
+    /// Дата удаления документа
+    /// </summary>
+    public DateTime? DateRemove { get; set; }
 }
