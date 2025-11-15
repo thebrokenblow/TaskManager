@@ -12,7 +12,6 @@ namespace TaskManager.Controllers;
 
 public class DocumentsController(
         IAuthService authService,
-        IUserRepository userRepository,
         IDocumentRepository documentRepository,
         IDocumentQuery documentQuery,
         IEmployeeRepository employeeRepository) : Controller
@@ -31,7 +30,7 @@ public class DocumentsController(
 
         if (authService.IsAdmin)
         {
-            (documents, countDocuments) = await documentQuery.GetDeletedRangeAsync((page - 1) * pageSize, pageSize);
+            (documents, countDocuments) = await documentQuery.GetDeletedRangeAsync(inputSearch, (page - 1) * pageSize, pageSize);
         }
         else if (!string.IsNullOrWhiteSpace(inputSearch))
         {
@@ -90,7 +89,6 @@ public class DocumentsController(
             return RedirectToAction("Index", "Accounts");
         }
 
-        document.IdAuthorCreateDocument = authService.CurrentUserId.Value;
         await documentRepository.AddAsync(document);
 
         return RedirectToAction(nameof(Index));
@@ -145,22 +143,7 @@ public class DocumentsController(
         return View(document);
     }
 
-    public async Task<IActionResult> RecoverDeletedTask(int id)
-    {
-        var document = await documentQuery.GetDetailsByIdAsync(id);
-
-        if (document == null)
-        {
-            return NotFound();
-        }
-
-        await documentRepository.RecoverDeletedTaskAsync(document);
-
-        return RedirectToAction(nameof(Index));
-    }
-
     [HttpPost]
-    [DocumentOwnerAuthorization]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var document = await documentRepository.GetByIdAsync(id);
@@ -174,14 +157,25 @@ public class DocumentsController(
         {
             await documentRepository.RemoveAsync(document);
         }
-
-        if (authService.IsAuthenticated)
+        else if (authService.IsAuthenticated)
         {
-            var adminId = await userRepository.GetIdByLoginAsync(AuthService.AdminLogin) ??
-                    throw new Exception();
-
-            await documentRepository.ChangeAuthorAsync(document, adminId);
+            await documentRepository.ChangeAuthorAsync(document, AuthService.IdAdmin);
         }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> RecoverDeletedTask(int id)
+    {
+        var document = await documentQuery.GetDetailsByIdAsync(id);
+
+        if (document == null)
+        {
+            return NotFound();
+        }
+
+        await documentRepository.RecoverDeletedTaskAsync(document);
 
         return RedirectToAction(nameof(Index));
     }

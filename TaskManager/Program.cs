@@ -36,7 +36,6 @@ builder.Services.AddDbContext<TaskManagerDbContext>(options =>
 
 // Регистрация сервисов
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 builder.Services.AddScoped<IDocumentQuery, DocumentQuery>();

@@ -9,6 +9,7 @@ public interface IDocumentQuery
         int countTake);
 
     Task<(List<FilteredRangeDocument> documents, int countDocuments)> GetDeletedRangeAsync(
+        string inputSearch,
         int countSkip,
         int countTake);
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaskManager.Repositories.Interfaces;
 using TaskManager.Services.Interfaces;
 using TaskManager.Utils;
 using TaskManager.ViewModel;
@@ -7,7 +8,9 @@ using TaskManager.ViewModel;
 namespace TaskManager.Controllers;
 
 [AllowAnonymous]
-public class AccountsController(IAuthService authService) : Controller
+public class AccountsController(
+    IEmployeeRepository employeeRepository, 
+    IAuthService authService) : Controller
 {
     [HttpGet]
     public IActionResult Login(string? returnUrl = null)
@@ -44,6 +47,41 @@ public class AccountsController(IAuthService authService) : Controller
     public async Task<IActionResult> Logout()
     {
         await authService.LogoutAsync();
+
+        return RedirectToDocuments();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ChangePassword(int id)
+    {
+        var employee = await employeeRepository.GetByIdAsync(id);
+
+        if (employee == null)
+        {
+            return NotFound();
+        }
+
+        var passwordViewModel = new PasswordViewModel
+        {
+            Id = id,
+            Password = employee.Password
+        };
+
+        return View(passwordViewModel);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ChangePasswordConfirmed(int id, PasswordViewModel passwordViewModel)
+    {
+        var employee = await employeeRepository.GetByIdAsync(id);
+
+        if (employee is null)
+        {
+            return NotFound();
+        }
+
+        employee.Password = passwordViewModel.Password;
+        await employeeRepository.UpdateAsync(employee);
 
         return RedirectToDocuments();
     }

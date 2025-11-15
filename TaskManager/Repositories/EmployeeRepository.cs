@@ -21,6 +21,13 @@ public class EmployeeRepository(TaskManagerDbContext context) : IEmployeeReposit
         return employee;
     }
 
+    public async Task<Employee?> GetByLoginAsync(string login)
+    {
+        var employee = await context.Employees.FirstOrDefaultAsync(employee => employee.Login == login);
+
+        return employee;
+    }
+
     public async Task AddAsync(Employee employee)
     {
         await context.AddAsync(employee);

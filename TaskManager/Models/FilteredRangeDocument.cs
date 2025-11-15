@@ -35,18 +35,6 @@ public class FilteredRangeDocument
     /// </summary>
     public required DateOnly SourceDueDate { get; set; }
 
-    /// <summary>
-    /// Идентификатор ответственного сотрудника из исходных данных
-    /// Обязательное поле
-    /// </summary>
-    public required int IdSourceResponsibleEmployee { get; set; }
-
-    /// <summary>
-    /// Ответственный сотрудник из исходных данных
-    /// </summary>
-    public required Employee SourceResponsibleEmployee { get; set; }
-
-    // Выходные данные документа
 
     /// <summary>
     /// Номер исходящего документа из выходных данных
@@ -70,6 +58,12 @@ public class FilteredRangeDocument
     public required int IdAuthorCreateDocument { get; set; }
 
     /// <summary>
+    /// Навигационно свойство пользователя, который создал запись
+    /// Обязательное поле
+    /// </summary>
+    public required Employee AuthorCreateDocument { get; set; }
+
+    /// <summary>
     /// Признак завершения задачи
     /// </summary>
     public bool IsCompleted { get; set; }
@@ -84,4 +78,5 @@ public class FilteredRangeDocument
     /// Обязательное поле
     /// </summary>
     public int? IdAuthorRemoveDocument { get; set; }
+
 }

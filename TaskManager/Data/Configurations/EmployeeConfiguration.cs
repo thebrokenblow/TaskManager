@@ -28,5 +28,20 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
             .Property(employee => employee.Department)
             .HasColumnName("department")
             .IsRequired();
+
+        builder
+            .Property(employee => employee.Login)
+            .HasColumnName("login")
+            .IsRequired();
+
+        builder
+            .Property(employee => employee.Password)
+            .HasColumnName("password")
+            .IsRequired();
+
+        builder
+            .Property(employee => employee.Role)
+            .HasColumnName("role")
+            .IsRequired();
     }
 }

@@ -63,48 +63,6 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
             .IsRequired();
 
         builder
-            .Property(document => document.IdSourceResponsibleEmployee)
-            .HasColumnName("id_source_responsible_employee")
-            .IsRequired();
-
-        builder
-            .HasOne(document => document.SourceResponsibleEmployee)
-            .WithMany()
-            .HasForeignKey(document => document.IdSourceResponsibleEmployee)
-            .OnDelete(DeleteBehavior.Restrict)
-            .IsRequired();
-
-        builder
-            .Property(document => document.OutputOutgoingNumber)
-            .HasColumnName("output_outgoing_number");
-
-        builder
-            .Property(document => document.OutputOutgoingDate)
-            .HasColumnName("output_outgoing_date");
-
-        builder
-            .Property(document => document.OutputSentTo)
-            .HasColumnName("output_sent_to");
-
-        builder
-            .Property(document => document.OutputTransferredInWorkOrder)
-            .HasColumnName("output_transferred_in_work_order");
-
-        builder
-            .Property(document => document.OutputResponseSubmissionMark)
-            .HasColumnName("output_response_submission_mark");
-
-        builder
-            .Property(document => document.IsUnderControl)
-            .HasColumnName("is_under_control")
-            .IsRequired();
-
-        builder
-            .Property(document => document.IsCompleted)
-            .HasColumnName("is_completed")
-            .IsRequired();
-
-        builder
             .Property(document => document.IdAuthorCreateDocument)
             .HasColumnName("id_author_create_document")
             .IsRequired();
@@ -114,6 +72,37 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
             .WithMany()
             .HasForeignKey(document => document.IdAuthorCreateDocument)
             .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired();
+
+        builder
+            .Property(document => document.OutputOutgoingNumber)
+            .HasColumnName("output_outgoing_number")
+            .IsRequired(false);
+
+        builder
+            .Property(document => document.OutputOutgoingDate)
+            .HasColumnName("output_outgoing_date")
+            .HasColumnType("date")
+            .IsRequired(false);
+
+        builder
+            .Property(document => document.OutputSentTo)
+            .HasColumnName("output_sent_to")
+            .IsRequired(false);
+
+        builder
+            .Property(document => document.OutputTransferredInWorkOrder)
+            .HasColumnName("output_transferred_in_work_order")
+            .IsRequired(false);
+
+        builder
+            .Property(document => document.IsUnderControl)
+            .HasColumnName("is_under_control")
+            .IsRequired();
+
+        builder
+            .Property(document => document.IsCompleted)
+            .HasColumnName("is_completed")
             .IsRequired();
 
         builder

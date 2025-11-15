@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
+using TaskManager.Models;
 using TaskManager.Repositories.Interfaces;
 using TaskManager.Services.Interfaces;
 using TaskManager.ViewModel;
@@ -8,19 +9,19 @@ using TaskManager.ViewModel;
 namespace TaskManager.Services;
 
 public class AuthService(
-    IUserRepository userRepository, 
+    IEmployeeRepository employeeRepository,
     IHttpContextAccessor httpContextAccessor) : IAuthService
 {
-    public const string AdminLogin = "lunnen";
+    public const int IdAdmin = 1;
 
     public bool IsAuthenticated =>
         _httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
 
-    public string? CurrentUserLogin =>
-        _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Name)?.Value;
-    
     public bool IsAdmin =>
-        CurrentUserLogin == AdminLogin;
+        _httpContextAccessor.HttpContext?.User.IsInRole(RolesDictionary.Admin.ToString()) ?? false;
+
+    public string? FullName =>
+       _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value.ToString();
 
     public int? CurrentUserId
     {
@@ -37,17 +38,22 @@ public class AuthService(
         }
     }
 
-    private readonly IUserRepository _userRepository = userRepository ??
-            throw new ArgumentNullException(nameof(userRepository), "userRepository is null");
+    private readonly IEmployeeRepository _employeeRepository = employeeRepository ??
+            throw new ArgumentNullException(nameof(employeeRepository), "userRepository is null");
 
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor ??
             throw new ArgumentNullException(nameof(httpContextAccessor), "httpContextAccessor is null");
 
     public async Task<bool> LoginAsync(LoginViewModel loginViewModel)
     {
-        var user = await _userRepository.GetByLoginAsync(loginViewModel.Login);
+        var user = await _employeeRepository.GetByLoginAsync(loginViewModel.Login);
 
         if (user == null)
+        {
+            return false;
+        }
+
+        if (user.Login != loginViewModel.Login)
         {
             return false;
         }
@@ -59,8 +65,9 @@ public class AuthService(
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new(ClaimTypes.Name, user.Login),
+            new (ClaimTypes.Role, user.Role.ToString()),
+            new (ClaimTypes.Name, user.FullName),
+            new (ClaimTypes.NameIdentifier, user.Id.ToString()),
         };
 
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

@@ -12,7 +12,7 @@ using TaskManager.Data;
 namespace TaskManager.Migrations
 {
     [DbContext(typeof(TaskManagerDbContext))]
-    [Migration("20251111215902_Init")]
+    [Migration("20251114152946_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -46,10 +46,6 @@ namespace TaskManager.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("id_author_remove_document");
 
-                    b.Property<int>("IdSourceResponsibleEmployee")
-                        .HasColumnType("integer")
-                        .HasColumnName("id_source_responsible_employee");
-
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_completed");
@@ -65,10 +61,6 @@ namespace TaskManager.Migrations
                     b.Property<string>("OutputOutgoingNumber")
                         .HasColumnType("text")
                         .HasColumnName("output_outgoing_number");
-
-                    b.Property<string>("OutputResponseSubmissionMark")
-                        .HasColumnType("text")
-                        .HasColumnName("output_response_submission_mark");
 
                     b.Property<string>("OutputSentTo")
                         .HasColumnType("text")
@@ -120,8 +112,6 @@ namespace TaskManager.Migrations
 
                     b.HasIndex("IdAuthorRemoveDocument");
 
-                    b.HasIndex("IdSourceResponsibleEmployee");
-
                     b.ToTable("documents", (string)null);
                 });
 
@@ -144,20 +134,6 @@ namespace TaskManager.Migrations
                         .HasColumnType("text")
                         .HasColumnName("full_name");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("employees", (string)null);
-                });
-
-            modelBuilder.Entity("TaskManager.Models.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
                     b.Property<string>("Login")
                         .IsRequired()
                         .HasColumnType("text")
@@ -168,35 +144,31 @@ namespace TaskManager.Migrations
                         .HasColumnType("text")
                         .HasColumnName("password");
 
+                    b.Property<int>("Role")
+                        .HasColumnType("integer")
+                        .HasColumnName("role");
+
                     b.HasKey("Id");
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("employees", (string)null);
                 });
 
             modelBuilder.Entity("TaskManager.Models.Document", b =>
                 {
-                    b.HasOne("TaskManager.Models.User", "AuthorCreateDocument")
+                    b.HasOne("TaskManager.Models.Employee", "AuthorCreateDocument")
                         .WithMany()
                         .HasForeignKey("IdAuthorCreateDocument")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TaskManager.Models.User", "AuthorRemoveDocument")
+                    b.HasOne("TaskManager.Models.Employee", "AuthorRemoveDocument")
                         .WithMany()
                         .HasForeignKey("IdAuthorRemoveDocument")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("TaskManager.Models.Employee", "SourceResponsibleEmployee")
-                        .WithMany()
-                        .HasForeignKey("IdSourceResponsibleEmployee")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("AuthorCreateDocument");
 
                     b.Navigation("AuthorRemoveDocument");
-
-                    b.Navigation("SourceResponsibleEmployee");
                 });
 #pragma warning restore 612, 618
         }

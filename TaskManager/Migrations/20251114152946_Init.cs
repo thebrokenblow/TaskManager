@@ -19,25 +19,14 @@ namespace TaskManager.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     full_name = table.Column<string>(type: "text", nullable: false),
-                    department = table.Column<string>(type: "text", nullable: false)
+                    department = table.Column<string>(type: "text", nullable: false),
+                    login = table.Column<string>(type: "text", nullable: false),
+                    password = table.Column<string>(type: "text", nullable: false),
+                    role = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_employees", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "users",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    login = table.Column<string>(type: "text", nullable: false),
-                    password = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_users", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -54,15 +43,13 @@ namespace TaskManager.Migrations
                     source_output_document_number = table.Column<string>(type: "text", nullable: false),
                     source_output_document_date = table.Column<DateOnly>(type: "date", nullable: false),
                     source_due_date = table.Column<DateOnly>(type: "date", nullable: false),
-                    id_source_responsible_employee = table.Column<int>(type: "integer", nullable: false),
+                    id_author_create_document = table.Column<int>(type: "integer", nullable: false),
                     output_outgoing_number = table.Column<string>(type: "text", nullable: true),
                     output_outgoing_date = table.Column<DateOnly>(type: "date", nullable: true),
                     output_sent_to = table.Column<string>(type: "text", nullable: true),
                     output_transferred_in_work_order = table.Column<string>(type: "text", nullable: true),
-                    output_response_submission_mark = table.Column<string>(type: "text", nullable: true),
                     is_under_control = table.Column<bool>(type: "boolean", nullable: false),
                     is_completed = table.Column<bool>(type: "boolean", nullable: false),
-                    id_author_create_document = table.Column<int>(type: "integer", nullable: false),
                     id_author_remove_document = table.Column<int>(type: "integer", nullable: true),
                     date_remove = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -70,21 +57,15 @@ namespace TaskManager.Migrations
                 {
                     table.PrimaryKey("PK_documents", x => x.id);
                     table.ForeignKey(
-                        name: "FK_documents_employees_id_source_responsible_employee",
-                        column: x => x.id_source_responsible_employee,
+                        name: "FK_documents_employees_id_author_create_document",
+                        column: x => x.id_author_create_document,
                         principalTable: "employees",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_documents_users_id_author_create_document",
-                        column: x => x.id_author_create_document,
-                        principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_documents_users_id_author_remove_document",
+                        name: "FK_documents_employees_id_author_remove_document",
                         column: x => x.id_author_remove_document,
-                        principalTable: "users",
+                        principalTable: "employees",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -98,11 +79,6 @@ namespace TaskManager.Migrations
                 name: "IX_documents_id_author_remove_document",
                 table: "documents",
                 column: "id_author_remove_document");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_documents_id_source_responsible_employee",
-                table: "documents",
-                column: "id_source_responsible_employee");
         }
 
         /// <inheritdoc />
@@ -113,9 +89,6 @@ namespace TaskManager.Migrations
 
             migrationBuilder.DropTable(
                 name: "employees");
-
-            migrationBuilder.DropTable(
-                name: "users");
         }
     }
 }

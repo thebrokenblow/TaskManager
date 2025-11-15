@@ -61,15 +61,15 @@ public class Document
     public required DateOnly SourceDueDate { get; set; }
 
     /// <summary>
-    /// Идентификатор ответственного сотрудника
+    /// Идентификатор пользователя, который создал запись
     /// Обязательное поле
     /// </summary>
-    public required int IdSourceResponsibleEmployee { get; set; }
+    public required int IdAuthorCreateDocument { get; set; }
 
     /// <summary>
-    /// Ответственный сотрудник
+    /// Навигационно свойство пользователя, который создал запись 
     /// </summary>
-    public Employee? SourceResponsibleEmployee { get; set; }
+    public Employee? AuthorCreateDocument { get; set; }
 
     // Выходные данные документа
 
@@ -94,11 +94,6 @@ public class Document
     public string? OutputTransferredInWorkOrder { get; set; }
 
     /// <summary>
-    /// Признак сдачи ответа из выходных данных
-    /// </summary>
-    public string? OutputResponseSubmissionMark { get; set; }
-
-    /// <summary>
     /// Признак нахождения задачи на контроле
     /// </summary>
     public bool IsUnderControl { get; set; }
@@ -109,17 +104,6 @@ public class Document
     public bool IsCompleted { get; set; }
 
     /// <summary>
-    /// Идентификатор пользователя, который создал запись
-    /// Обязательное поле
-    /// </summary>
-    public required int IdAuthorCreateDocument { get; set; }
-
-    /// <summary>
-    /// Навигационно свойство пользователя, который создал запись 
-    /// </summary>
-    public User? AuthorCreateDocument { get; set; }
-
-    /// <summary>
     /// Идентификатор пользователя, который удалил запись
     /// Обязательное поле
     /// </summary>
@@ -128,7 +112,7 @@ public class Document
     /// <summary>
     /// Навигационно свойство пользователя, который удалил запись
     /// </summary>
-    public User? AuthorRemoveDocument { get; set; }
+    public Employee? AuthorRemoveDocument { get; set; }
 
     /// <summary>
     /// Дата удаления документа

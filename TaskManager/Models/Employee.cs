@@ -22,4 +22,19 @@ public class Employee
     /// Обязательное поле
     /// </summary>
     public required string Department { get; set; }
+
+    /// <summary>
+    /// Логин сотрудника
+    /// </summary>
+    public required string Login { get; set; }
+
+    /// <summary>
+    /// Пароль сотрудника
+    /// </summary>
+    public required string Password { get; set; }
+
+    /// <summary>
+    /// Тип сотрудника
+    /// </summary>
+    public required RolesDictionary Role { get; set; }
 }

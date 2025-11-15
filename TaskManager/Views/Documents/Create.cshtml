@@ -1,5 +1,8 @@
 ﻿@using TaskManager.Models
+@using TaskManager.Services.Interfaces
 @using TaskManager.ViewModel
+
+@inject IAuthService authService
 @model Document
 
 @{
@@ -10,6 +13,19 @@
         throw new Exception();
     }
 }
+
+<style>
+    .readonly-disabled {
+        background-color: #e9ecef;
+        opacity: 1;
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+
+    .readonly-disabled::placeholder {
+        color: #6c757d;
+    }
+</style>
 
 <!-- Форма добавления нового документа -->
 <div class="card mb-4 mt-5">
@@ -49,7 +65,7 @@
                 <div class="row align-items-center g-3">
                     <div class="col-auto">
                         <div class="form-check">
-                            <input class="form-check-input" asp-for="SourceIsExternal" />
+                            <input class="form-check-input" asp-for="SourceIsExternal" checked />
                             <label class="form-check-label" asp-for="SourceIsExternal">
                                 Внешний документ
                             </label>
@@ -79,12 +95,26 @@
             <div class="col-12">
                 <div class="d-flex align-items-center gap-1">
                     <label class="form-label" style="min-width: 215px;">Ответственный сотрудник</label>
-                    <select asp-for="IdSourceResponsibleEmployee"
-                            class="form-control"
-                            asp-items="selecListEmployees"
-                            required>
-                        <option value="">Выберите сотрудника</option>
-                    </select>
+                    @if (authService.IsAdmin)
+                    {
+                        <select asp-for="IdAuthorCreateDocument"
+                                class="form-control"
+                                asp-items="selecListEmployees"
+                                required>
+                            <option value="">Выберите сотрудника</option>
+                        </select>
+                    }
+                    else
+                    {
+                        <select asp-for="@authService.CurrentUserId"
+                                class="form-control readonly-disabled"
+                                asp-items="selecListEmployees"
+                                readonly>
+                            <option value="">Выберите сотрудника</option>
+                        </select>
+
+                        <input type="hidden" asp-for="IdAuthorCreateDocument" value="@authService.CurrentUserId" />
+                    }
                 </div>
             </div>
 
@@ -108,20 +138,6 @@
                 <div class="d-flex align-items-center gap-2">
                     <label class="form-label mb-0" style="min-width: 130px;">Кому направлен</label>
                     <input type="text" class="form-control" asp-for="OutputSentTo">
-                </div>
-            </div>
-
-            <div class="col-md-12">
-                <div class="d-flex align-items-center gap-2">
-                    <label class="form-label" style="min-width: 230px">Передача в рабочем порядке</label>
-                    <input type="text" class="form-control" asp-for="OutputTransferredInWorkOrder">
-                </div>
-            </div>
-
-            <div class="col-md-12">
-                <div class="d-flex align-items-center gap-2">
-                    <label class="form-label" style="min-width: 230px">Признак сдачи ответа</label>
-                    <input type="text" class="form-control" asp-for="OutputResponseSubmissionMark">
                 </div>
             </div>
 

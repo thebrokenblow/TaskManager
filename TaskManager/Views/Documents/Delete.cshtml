@@ -69,7 +69,7 @@
                                         <tr>
                                             <th>Ответственный:</th>
                                             <td>
-                                                @($"{Model.SourceResponsibleEmployee!.FullName} ({Model.SourceResponsibleEmployee.Department})")
+                                                @($"{Model.AuthorCreateDocument!.FullName} ({Model.AuthorCreateDocument.Department})")
                                             </td>
                                         </tr>
 
@@ -109,32 +109,6 @@
                                                 @if (!string.IsNullOrEmpty(Model.OutputSentTo))
                                                 {
                                                     @Model.OutputSentTo
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">Не указан</span>
-                                                }
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Передача в рабочем порядке:</th>
-                                            <td>
-                                                @if (!string.IsNullOrEmpty(Model.OutputTransferredInWorkOrder))
-                                                {
-                                                    @Model.OutputTransferredInWorkOrder
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">Не указана</span>
-                                                }
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Признак сдачи ответа:</th>
-                                            <td>
-                                                @if (!string.IsNullOrEmpty(Model.OutputResponseSubmissionMark))
-                                                {
-                                                    @Model.OutputResponseSubmissionMark
                                                 }
                                                 else
                                                 {
