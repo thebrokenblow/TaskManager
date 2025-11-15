@@ -31,7 +31,7 @@
                                         </tr>
                                         <tr>
                                             <th>Дата исходящего документа:</th>
-                                            <td>@Model.SourceOutgoingDocumentDate.ToString("dd.MM.yyyy")</td>
+                                            <td>@Model.SourceOutgoingDocumentDate</td>
                                         </tr>
                                         <tr>
                                             <th>Заказчик:</th>
@@ -60,11 +60,11 @@
                                         </tr>
                                         <tr>
                                             <th>Дата входящего документа:</th>
-                                            <td>@Model.SourceOutputDocumentDate.ToString("dd.MM.yyyy")</td>
+                                            <td>@Model.SourceOutputDocumentDate</td>
                                         </tr>
                                         <tr>
                                             <th>Выполнить до:</th>
-                                            <td>@Model.SourceDueDate.ToString("dd.MM.yyyy")</td>
+                                            <td>@Model.SourceDueDate</td>
                                         </tr>
                                         <tr>
                                             <th>Ответственный:</th>
@@ -95,7 +95,7 @@
                                             <td>
                                                 @if (Model.OutputOutgoingDate.HasValue)
                                                 {
-                                                    @Model.OutputOutgoingDate.Value.ToString("dd.MM.yyyy")
+                                                    @Model.OutputOutgoingDate
                                                 }
                                                 else
                                                 {

@@ -124,10 +124,10 @@
                     <td class="@IsSpecialDocument(document)">@document.SourceOutgoingDocumentNumber</td>
                     <td class="@IsSpecialDocument(document)">@document.SourceOutputDocumentNumber</td>
                     <td class="@IsSpecialDocument(document)">@document.SourceTaskText</td>
-                    <td class="@IsSpecialDocument(document)">@document.SourceDueDate.ToString("yyyy.MM.dd")</td>
+                    <td class="@IsSpecialDocument(document)">@document.SourceDueDate</td>
                     <td class="@IsSpecialDocument(document)">@document.AuthorCreateDocument.FullName</td>
                     <td class="@IsSpecialDocument(document)">@document.OutputOutgoingNumber</td>
-                    <td class="@IsSpecialDocument(document)">@(document.OutputOutgoingDate.HasValue ? document.OutputOutgoingDate.Value.ToString("yyyy.MM.dd") : string.Empty)</td>
+                    <td class="@IsSpecialDocument(document)">@document.OutputOutgoingDate</td>
                     <td>
                         @*
                             Документ считается удалённым, если автор создания задачи считается admin и автор удаления удаления известен
@@ -175,7 +175,7 @@
                             </form>
                         }
 
-                        @if (authService.IsAdmin || document.IdAuthorCreateDocument == authService.CurrentUserId)
+                        @if (authService.IsAdmin || (document.IdAuthorCreateDocument == authService.CurrentUserId && !document.IsCompleted))
                         {
                             <a asp-action="Delete" asp-route-id="@document.Id" class="btn btn-link text-danger p-2 text-decoration-none" title="Удалить">
                                 <i class="fas fa-trash-alt fa-lg"></i>
