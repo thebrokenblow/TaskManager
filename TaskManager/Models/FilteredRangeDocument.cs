@@ -1,82 +1,87 @@
-﻿using TaskManager.Controllers;
+﻿namespace TaskManager.Models;
 
-namespace TaskManager.Models;
-
+/// <summary>
+/// Представляет документ в системе документооборота
+/// Содержит исходные данные документа и выходные данные обработки.
+/// </summary>
 public class FilteredRangeDocument
 {
     /// <summary>
-    /// Уникальный идентификатор документа
+    /// Уникальный идентификатор документа.
     /// </summary>
-    public required int Id { get; set; }
+    public int Id { get; set; }
 
     // Исходные данные документа
 
     /// <summary>
-    /// Номер исходящего документа (outgoing) из исходных данных
-    /// Обязательное поле
+    /// Номер исходящего документа из исходных данных.
+    /// Необязательное свойство.
     /// </summary>
-    public required string SourceOutgoingDocumentNumber { get; set; }
+    public string? SourceOutgoingDocumentNumber { get; set; }
 
     /// <summary>
-    /// Текст задачи из исходных данных
-    /// Обязательное поле
+    /// Текст задачи из исходных данных.
+    /// Обязательное свойство.
     /// </summary>
     public required string SourceTaskText { get; set; }
 
     /// <summary>
-    /// Номер выходящего документа (output) из исходных данных
-    /// Обязательное поле
+    /// Номер выходящего документа из исходных данных.
+    /// Обязательное свойство.
     /// </summary>
     public required string SourceOutputDocumentNumber { get; set; }
 
     /// <summary>
-    /// Срок выполнения из исходных данных
-    /// Обязательное поле
+    /// Срок выполнения из исходных данных.
+    /// Обязательное свойство.
     /// </summary>
     public required DateOnly SourceDueDate { get; set; }
 
-
     /// <summary>
-    /// Номер исходящего документа из выходных данных
+    /// Номер исходящего документа из выходных данных.
+    /// Необязательное свойство.
     /// </summary>
-    public required string? OutputOutgoingNumber { get; set; }
+    public string? OutputOutgoingNumber { get; set; }
 
     /// <summary>
-    /// Дата исходящего документа из выходных данных
+    /// Дата исходящего документа из выходных данных.
+    /// Необязательное свойство.
     /// </summary>
-    public required DateOnly? OutputOutgoingDate { get; set; }
+    public DateOnly? OutputOutgoingDate { get; set; }
 
     /// <summary>
-    /// Признак нахождения задачи на контроле
+    /// Признак нахождения задачи на контроле.
+    /// Обязательное свойство.
     /// </summary>
     public bool IsUnderControl { get; set; }
 
     /// <summary>
-    /// Идентификатор пользователя, который создал запись
-    /// Обязательное поле
+    /// Идентификатор пользователя, который создал запись.
+    /// Необязательное свойство.
     /// </summary>
-    public required int IdAuthorCreateDocument { get; set; }
+    public int? IdAuthorCreateDocument { get; set; }
 
     /// <summary>
-    /// Навигационно свойство пользователя, который создал запись
-    /// Обязательное поле
+    /// Навигационное свойство пользователя, который создал запись.
+    /// Необязательное свойство.
     /// </summary>
-    public required Employee AuthorCreateDocument { get; set; }
+    public Employee? AuthorCreateDocument { get; set; }
 
     /// <summary>
-    /// Признак завершения задачи
+    /// Признак завершения задачи.
+    /// Обязательное свойство.
     /// </summary>
-    public bool IsCompleted { get; set; }
+    public required bool IsCompleted { get; set; }
 
     /// <summary>
-    /// Дата удаления документа
+    /// Дата удаления документа.
+    /// Необязательное свойство.
     /// </summary>
     public DateTime? DateRemove { get; set; }
 
     /// <summary>
-    /// Идентификатор пользователя, который удалил запись
-    /// Обязательное поле
+    /// Идентификатор пользователя, который удалил запись.
+    /// Необязательное свойство.
     /// </summary>
     public int? IdAuthorRemoveDocument { get; set; }
-
 }

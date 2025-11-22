@@ -3,7 +3,7 @@
 @using TaskManager.ViewModel
 @using TaskManager.Services.Interfaces
 
-@model Document
+@model EditDocumentViewModel
 @inject IAuthService authService
 
 @{
@@ -14,7 +14,7 @@
         throw new Exception();
     }
 
-    var isNotReadonly = !Model.IsCompleted && (authService.IsAdmin || authService.CurrentUserId == Model.IdAuthorCreateDocument);
+    var isNotReadonly = !Model.Document.IsCompleted && (authService.IsAdmin || authService.CurrentUserId == Model.Document.IdAuthorCreateDocument);
 }
 
 <style>
@@ -33,12 +33,10 @@
 <!-- Форма редактирования документа -->
 <div class="card mb-4 mt-5">
     <div class="card-header">
-        <h5 class="mb-0">Редактировать документ</h5>
+        <h5 class="mb-0">Добавить новый документ</h5>
     </div>
     <div class="card-body">
-        <form method="post" asp-action="Edit" class="row g-3">
-            <input type="hidden" asp-for="Id" />
-
+        <form method="post" asp-action="Create" class="row g-3" id="documentForm">
             <!-- Исходные данные документа -->
             <div class="col-12">
                 <h6 class="border-bottom pb-2">Исходные данные документа</h6>
@@ -46,68 +44,35 @@
 
             <div class="col-md-4">
                 <div class="d-flex align-items-center gap-2">
-                    <label class="form-label mb-0">Исх.</label>
-                    @if (isNotReadonly)
-                    {
-                        <input type="text" class="form-control" asp-for="SourceOutgoingDocumentNumber" required>
-                    }
-                    else
-                    {
-                        <input type="text" class="form-control readonly-disabled" asp-for="SourceOutgoingDocumentNumber" readonly>
-                    }
+                    <label class="form-label mb-0 text-nowrap">Исх.:</label>
+                    <input type="text" class="form-control" asp-for="@Model.Document.SourceOutgoingDocumentNumber">
                 </div>
-            </div>
-
-            <div class="col-md-4">
-                @if (isNotReadonly)
-                {
-                    <input type="date" class="form-control" asp-for="SourceOutgoingDocumentDate" required>
-                }
-                else
-                {
-                    <input type="date" class="form-control readonly-disabled" asp-for="SourceOutgoingDocumentDate" readonly>
-                }
             </div>
 
             <div class="col-md-4">
                 <div class="d-flex align-items-center gap-2">
-                    <label class="form-label mb-0">Заказчик</label>
-                    @if (isNotReadonly)
-                    {
-                        <input type="text" class="form-control" asp-for="SourceCustomer" required>
-                    }
-                    else
-                    {
-                        <input type="text" class="form-control readonly-disabled" asp-for="SourceCustomer" readonly>
-                    }
+                    <label class="form-label mb-0 text-nowrap">Дата:</label>
+                    <input type="date" class="form-control" asp-for="@Model.Document.SourceOutgoingDocumentDate">
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label mb-0 text-nowrap">Заказчик:</label>
+                    <input type="text" class="form-control" asp-for="@Model.Document.SourceCustomer">
                 </div>
             </div>
 
             <div class="col-12">
-                @if (isNotReadonly)
-                {
-                    <textarea class="form-control" asp-for="SourceTaskText" rows="3" required></textarea>
-                }
-                else
-                {
-                    <textarea class="form-control readonly-disabled" asp-for="SourceTaskText" rows="3" readonly></textarea>
-                }
+                <textarea class="form-control" placeholder="Краткое содержание документа" asp-for="@Model.Document.SourceTaskText" rows="3"></textarea>
             </div>
 
             <div class="col-12">
                 <div class="row align-items-center g-3">
                     <div class="col-auto">
                         <div class="form-check">
-                            @if (isNotReadonly)
-                            {
-                                <input class="form-check-input" asp-for="SourceIsExternal">
-                            }
-                            else
-                            {
-                                <input class="form-check-input readonly-disabled" asp-for="SourceIsExternal" readonly>
-                                <input type="hidden" asp-for="SourceIsExternal" />
-                            }
-                            <label class="form-check-label" asp-for="SourceIsExternal">
+                            <input class="form-check-input" asp-for="@Model.Document.SourceIsExternal" id="SourceIsExternal" />
+                            <label class="form-check-label" asp-for="@Model.Document.SourceIsExternal">
                                 Внешний документ
                             </label>
                         </div>
@@ -115,149 +80,91 @@
 
                     <div class="col">
                         <div class="d-flex align-items-center gap-2">
-                            <label class="form-label mb-0" style="min-width: 100px;">Вх(46 ЦНИИ)</label>
-                            @if (isNotReadonly)
-                            {
-                                <input type="text" class="form-control" asp-for="SourceOutputDocumentNumber" required>
-                            }
-                            else
-                            {
-                                <input type="text" class="form-control readonly-disabled" asp-for="SourceOutputDocumentNumber" readonly>
-                            }
+                            <label class="form-label mb-0 text-nowrap">Вх (46 ЦНИИ): *</label>
+                            <input type="text" class="form-control" asp-for="@Model.Document.SourceOutputDocumentNumber" id="SourceOutputDocumentNumber" required>
                         </div>
-                    </div>
-
-                    <div class="col">
-                        @if (isNotReadonly)
-                        {
-                            <input type="date" class="form-control" asp-for="SourceOutputDocumentDate" required>
-                        }
-                        else
-                        {
-                            <input type="date" class="form-control readonly-disabled" asp-for="SourceOutputDocumentDate" readonly>
-                        }
                     </div>
 
                     <div class="col">
                         <div class="d-flex align-items-center gap-2">
-                            <label class="form-label mb-0" style="min-width: 120px;">Выполнить до</label>
-                            @if (isNotReadonly)
-                            {
-                                <input type="date" class="form-control" asp-for="SourceDueDate" required>
-                            }
-                            else
-                            {
-                                <input type="date" class="form-control readonly-disabled" asp-for="SourceDueDate" readonly>
-                            }
+                            <label class="form-label mb-0 text-nowrap">Дата: *</label>
+                            <input type="date" class="form-control" asp-for="@Model.Document.SourceOutputDocumentDate" required>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Остальная часть формы без изменений -->
             <div class="col-12">
-                <div class="d-flex align-items-center gap-1">
-                    <label class="form-label" style="min-width: 215px;">Ответственный сотрудник</label>
-                    @if (authService.IsAdmin && isNotReadonly)
-                    {
-                        <select asp-for="IdAuthorCreateDocument"
-                                class="form-control"
-                                asp-items="selecListEmployees"
-                                required>
-                            <option value="">Выберите сотрудника</option>
-                        </select>
-                    }
-                    else
-                    {
-                        <select asp-for="IdAuthorCreateDocument"
-                                class="form-control readonly-disabled"
-                                asp-items="selecListEmployees"
-                                readonly>
-                            <option value="">Выберите сотрудника</option>
-                        </select>
-                        <input type="hidden" asp-for="IdAuthorCreateDocument" />
-                    }
+                <div class="d-flex align-items-center gap-2 w-100">
+                    <div class="d-flex align-items-center gap-2 flex-fill">
+                        <label class="form-label mb-0 text-nowrap">Отвественный (-ые) отдел (-ы):</label>
+                        <input type="text" class="form-control" asp-for="@Model.Document.SourseResponsibleDepartment">
+                    </div>
+                    <div class="d-flex align-items-center gap-2 flex-fill">
+                        <label class="form-label mb-0 text-nowrap">Выполнить до: *</label>
+                        <input type="date" class="form-control" asp-for="@Model.Document.SourceDueDate" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label mb-0 text-nowrap">Ответственный сотрудник:</label>
+                    <select asp-for="@Model.Document.IdAuthorCreateDocument"
+                            class="form-control"
+                            asp-items="@Model.Employees">
+                        <option value="">Выберите сотрудника</option>
+                    </select>
                 </div>
             </div>
 
             <!-- Выходные данные документа -->
-            <div class="col-12">
+            <div class="col-12 mt-4">
                 <h6 class="border-bottom pb-2">Выходные данные документа</h6>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-12">
                 <div class="d-flex align-items-center gap-2">
-                    <label class="form-label mb-0">Исх.</label>
-                    @if (!Model.IsCompleted)
-                    {
-                        <input type="text" class="form-control" asp-for="OutputOutgoingNumber">
-                    }
-                    else
-                    {
-                        <input type="text" class="form-control readonly-disabled" asp-for="OutputOutgoingNumber" readonly>
-                    }
-                </div>
-            </div>
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" asp-for="@Model.Document.SourceIsExternal" checked />
+                        <label class="form-check-label" asp-for="@Model.Document.SourceIsExternal">
+                            Внешний документ
+                        </label>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 flex-fill">
+                        <label class="form-label mb-0 text-nowrap">Исх (46 ЦНИИ):</label>
+                        <input type="text" class="form-control" asp-for="@Model.Document.OutputOutgoingNumber">
+                    </div>
 
-            <div class="col-md-4">
-                @if (!Model.IsCompleted)
-                {
-                    <input type="date" class="form-control" asp-for="OutputOutgoingDate">
-                }
-                else
-                {
-                    <input type="date" class="form-control readonly-disabled" asp-for="OutputOutgoingDate" readonly>
-                }
-            </div>
+                    <div class="d-flex align-items-center gap-2 flex-fill">
+                        <label class="form-label mb-0 text-nowrap">Дата:</label>
+                        <input type="date" class="form-control" asp-for="@Model.Document.OutputOutgoingDate">
+                    </div>
 
-            <div class="col-md-4">
-                <div class="d-flex align-items-center gap-2">
-                    <label class="form-label mb-0" style="min-width: 130px;">Кому направлен</label>
-                    @if (!Model.IsCompleted)
-                    {
-                        <input type="text" class="form-control" asp-for="OutputSentTo">
-                    }
-                    else
-                    {
-                        <input type="text" class="form-control readonly-disabled" asp-for="OutputSentTo" readonly>
-                    }
+                    <div class="d-flex align-items-center gap-2 flex-fill">
+                        <label class="form-label mb-0 text-nowrap">Получатель:</label>
+                        <input type="text" class="form-control" asp-for="@Model.Document.OutputSentTo">
+                    </div>
                 </div>
             </div>
 
             <div class="col-12">
                 <div class="d-flex align-items-center gap-2">
-                    <label class="form-label mb-0" style="min-width: 250px;">Передан в работу по приказу</label>
-                    @if (!Model.IsCompleted)
-                    {
-                        <input type="text" class="form-control" asp-for="OutputTransferredInWorkOrder">
-                    }
-                    else
-                    {
-                        <input type="text" class="form-control readonly-disabled" asp-for="OutputTransferredInWorkOrder" readonly>
-                    }
+                    <textarea placeholder="Краткое содержание документа" class="form-control" asp-for="@Model.Document.OutputContentAnswer"></textarea>
                 </div>
             </div>
 
             <div class="col-12">
                 <div class="d-flex justify-content-between">
                     <div class="form-check">
-                        @if (!Model.IsCompleted)
-                        {
-                            <input class="form-check-input" asp-for="IsUnderControl" />
-                        }
-                        else
-                        {
-                            <input class="form-check-input readonly-disabled" asp-for="IsUnderControl" readonly>
-                            <input type="hidden" asp-for="IsUnderControl" />
-                        }
-                        <label class="form-check-label text-uppercase" asp-for="IsUnderControl">
+                        <input class="form-check-input" asp-for="@Model.Document.IsUnderControl" />
+                        <label class="form-check-label text-uppercase" asp-for="@Model.Document.IsUnderControl">
                             На контроле
                         </label>
                     </div>
                     <div>
-                        @if (!Model.IsCompleted)
-                        {
-                            <button type="submit" class="btn btn-success">Сохранить</button>
-                        }
+                        <button type="submit" class="btn btn-success">Создать</button>
                         <a asp-action="Index" class="btn btn-secondary">Назад к списку</a>
                     </div>
                 </div>
@@ -265,3 +172,55 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM loaded');
+
+            const externalCheckbox = document.getElementById('SourceIsExternal');
+            const outputDocumentInput = document.getElementById('SourceOutputDocumentNumber');
+
+            console.log('Checkbox found:', externalCheckbox);
+            console.log('Input found:', outputDocumentInput);
+
+            if (!externalCheckbox || !outputDocumentInput) {
+                console.error('Elements not found!');
+                return;
+            }
+
+            function updateOutputDocumentField() {
+                console.log('Checkbox changed, checked:', externalCheckbox.checked);
+                console.log('Current input value:', outputDocumentInput.value);
+
+                if (externalCheckbox.checked) {
+                    // Если внешний документ - разрешаем ввод
+                    outputDocumentInput.removeAttribute('readonly');
+                    outputDocumentInput.classList.remove('readonly-disabled');
+                    outputDocumentInput.placeholder = 'Введите номер документа';
+
+                    // Если текущее значение "нет" - очищаем поле
+                    if (outputDocumentInput.value === 'нет') {
+                        outputDocumentInput.value = '';
+                    }
+                } else {
+                    // Если не внешний документ - ставим "нет" и блокируем
+                    outputDocumentInput.value = 'нет';
+                    outputDocumentInput.setAttribute('readonly', 'readonly');
+                    outputDocumentInput.classList.add('readonly-disabled');
+                    outputDocumentInput.placeholder = 'Автоматически установлено в "нет"';
+                }
+
+                console.log('New input value:', outputDocumentInput.value);
+            }
+
+            // Обработчик изменения чекбокса
+            externalCheckbox.addEventListener('change', updateOutputDocumentField);
+
+            // Инициализация при загрузке страницы
+            updateOutputDocumentField();
+
+            console.log('Event listener attached');
+        });
+    </script>
+}

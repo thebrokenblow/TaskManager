@@ -63,6 +63,17 @@ public class DocumentsController(
     [AuthenticatedUser]
     public async Task<IActionResult> Create()
     {
+        var document = new Document
+        {
+            SourceOutputDocumentNumber = string.Empty,
+            SourceOutgoingDocumentDate = DateOnly.FromDateTime(DateTime.Now),
+            SourceOutputDocumentDate = DateOnly.FromDateTime(DateTime.Now),
+            SourceDueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(5)),
+            SourceIsExternal = true,
+            IsUnderControl = false,
+            IsCompleted = false
+        };
+
         var employees = await employeeRepository.GetAllAsync();
 
         var employeesForSelect = employees.Select(employee => new EmployeeForSelect
@@ -76,9 +87,13 @@ public class DocumentsController(
                                         nameof(EmployeeForSelect.Id),
                                         nameof(EmployeeForSelect.FullNameAndDepartment));
 
-        ViewData[nameof(EmployeeForSelect)] = selectListEmployees;
+        var createDocumentViewModel = new CreateDocumentViewModel
+        {
+            Document = document,
+            Employees = selectListEmployees,
+        };
 
-        return View();
+        return View(createDocumentViewModel);
     }
 
     [HttpPost]
@@ -95,6 +110,7 @@ public class DocumentsController(
     }
 
     [HttpGet]
+    [AuthenticatedUser]
     public async Task<IActionResult> Edit(int id)
     {
         var document = await documentRepository.GetByIdAsync(id);
@@ -119,12 +135,21 @@ public class DocumentsController(
 
         ViewData[nameof(EmployeeForSelect)] = selectListEmployees;
 
-        return View(document);
+        var editDocumentViewModel = new EditDocumentViewModel
+        {
+            Document = document,
+            Employees = selectListEmployees
+        };
+
+        return View(editDocumentViewModel);
     }
 
     [HttpPost]
     public async Task<IActionResult> Edit(Document document)
     {
+        document.LastModifiedDate = DateTime.Now;
+        document.LastModifiedByEmployee = authService.FullName;
+
         await documentRepository.UpdateAsync(document);
         return RedirectToAction(nameof(Index));
     }

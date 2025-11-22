@@ -1,4 +1,6 @@
-﻿namespace TaskManager.Models;
+﻿using TaskManager.Domain.Entities.Enums;
+
+namespace TaskManager.Domain.Entities;
 
 /// <summary>
 /// Представляет сотрудника в системе управления задачами

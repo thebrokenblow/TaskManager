@@ -114,7 +114,10 @@
                 <th>Исполнитель</th>
                 <th>Исх. №</th>
                 <th>Исх. дата</th>
-                <th>Действия</th>
+                @if (authService.IsAuthenticated)
+                {
+                    <th>Действия</th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -125,7 +128,7 @@
                     <td class="@IsSpecialDocument(document)">@document.SourceOutputDocumentNumber</td>
                     <td class="@IsSpecialDocument(document)">@document.SourceTaskText</td>
                     <td class="@IsSpecialDocument(document)">@document.SourceDueDate</td>
-                    <td class="@IsSpecialDocument(document)">@document.AuthorCreateDocument.FullName</td>
+                    <td class="@IsSpecialDocument(document)">@document.AuthorCreateDocument?.FullName</td>
                     <td class="@IsSpecialDocument(document)">@document.OutputOutgoingNumber</td>
                     <td class="@IsSpecialDocument(document)">@document.OutputOutgoingDate</td>
                     <td>
@@ -136,15 +139,12 @@
                             var isDeletedDocument = document.IdAuthorCreateDocument == AuthService.IdAdmin && document.IdAuthorRemoveDocument != null;
                         }
 
-                        @if (!isDeletedDocument)
+                        @if (!isDeletedDocument && authService.IsAuthenticated)
                         {
                             <a asp-action="Edit" asp-route-id="@document.Id" class="btn btn-link text-primary p-2 text-decoration-none" title="Редактировать задачу">
                                 <i class="fas fa-edit fa-lg"></i>
                             </a>
-                        }
 
-                        @if (!isDeletedDocument)
-                        {
                             @if (document.IsCompleted)
                             {
                                 <form asp-action="ChangeStatusTask" method="post" class="d-inline">

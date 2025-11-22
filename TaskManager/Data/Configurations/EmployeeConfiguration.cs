@@ -8,40 +8,40 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
 {
     public void Configure(EntityTypeBuilder<Employee> builder)
     {
-        builder
-            .ToTable("employees");
+        builder.ToTable("employees",
+            tableBuilder => 
+                tableBuilder.HasComment("Таблица для хранения данных сотрудников системы TaskManager"));
 
-        builder
-            .HasKey(employee => employee.Id);
+        builder.HasKey(employee => employee.Id);
 
-        builder
-            .Property(employee => employee.Id)
+        builder.Property(employee => employee.Id)
             .HasColumnName("id")
-            .UseIdentityByDefaultColumn();
+            .UseIdentityByDefaultColumn()
+            .HasComment("Уникальный идентификатор сотрудника");
 
-        builder
-            .Property(employee => employee.FullName)
+        builder.Property(employee => employee.FullName)
             .HasColumnName("full_name")
+            .HasComment("Полное имя сотрудника (фамилия и инициалы)")
             .IsRequired();
 
-        builder
-            .Property(employee => employee.Department)
+        builder.Property(employee => employee.Department)
             .HasColumnName("department")
+            .HasComment("Подразделение или отдел, в котором работает сотрудник")
             .IsRequired();
 
-        builder
-            .Property(employee => employee.Login)
+        builder.Property(employee => employee.Login)
             .HasColumnName("login")
+            .HasComment("Логин сотрудника для входа в систему")
             .IsRequired();
 
-        builder
-            .Property(employee => employee.Password)
+        builder.Property(employee => employee.Password)
             .HasColumnName("password")
+            .HasComment("Пароль сотрудника для входа в систему")
             .IsRequired();
 
-        builder
-            .Property(employee => employee.Role)
+        builder.Property(employee => employee.Role)
             .HasColumnName("role")
+            .HasComment("Тип сотрудника (роль в системе)")
             .IsRequired();
     }
 }

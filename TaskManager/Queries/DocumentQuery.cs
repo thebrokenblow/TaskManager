@@ -54,9 +54,9 @@ public class DocumentQuery(TaskManagerDbContext context) : IDocumentQuery
         if (!string.IsNullOrWhiteSpace(inputSearch))
         {
             queryDocuments = queryDocuments.Where(document => 
-                                        document.SourceOutgoingDocumentNumber.Contains(inputSearch) ||
                                         document.SourceOutputDocumentNumber.Contains(inputSearch) ||
                                         document.SourceTaskText.Contains(inputSearch) ||
+                                        (document.SourceOutgoingDocumentNumber != null && document.SourceOutgoingDocumentNumber.Contains(inputSearch)) ||
                                         (document.OutputOutgoingNumber != null && document.OutputOutgoingNumber.Contains(inputSearch)));
         }
 
@@ -108,9 +108,9 @@ public class DocumentQuery(TaskManagerDbContext context) : IDocumentQuery
         if (!string.IsNullOrWhiteSpace(inputSearch))
         {
             queryDocuments = queryDocuments.Where(document =>
-                                        document.SourceOutgoingDocumentNumber.Contains(inputSearch) ||
                                         document.SourceOutputDocumentNumber.Contains(inputSearch) ||
                                         document.SourceTaskText.Contains(inputSearch) ||
+                                        (document.SourceOutgoingDocumentNumber != null && document.SourceOutgoingDocumentNumber.Contains(inputSearch)) ||
                                         (document.OutputOutgoingNumber != null && document.OutputOutgoingNumber.Contains(inputSearch)));
         }
 

@@ -8,7 +8,7 @@ namespace TaskManager.Controllers;
 
 public class EmployeesController(IEmployeeRepository employeeRepository) : Controller
 {
-    private const string DefaultPassword = "qwerty123";
+    private const string DefaultPassword = "Qwerty123";
 
     [HttpGet]
     public async Task<IActionResult> Index(Employee? employee)

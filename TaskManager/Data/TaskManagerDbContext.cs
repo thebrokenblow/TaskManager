@@ -11,7 +11,8 @@ public class TaskManagerDbContext(DbContextOptions<TaskManagerDbContext> options
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        var assembly = Assembly.GetExecutingAssembly();
+        modelBuilder.ApplyConfigurationsFromAssembly(assembly);
         base.OnModelCreating(modelBuilder);
     }
 }
