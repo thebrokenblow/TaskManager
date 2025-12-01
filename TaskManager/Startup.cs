@@ -1,0 +1,52 @@
+﻿using Microsoft.EntityFrameworkCore;
+using TaskManager.Application;
+using TaskManager.Domain.Services;
+using TaskManager.Persistence;
+using TaskManager.View.Configurations;
+using TaskManager.View.Services;
+
+namespace TaskManager.View;
+
+public class Startup(IConfiguration configuration)
+{
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddHttpContextAccessor();
+        services.AddControllersWithViews();
+
+        services.AddScoped<IAuthService, AuthService>();
+
+        AuthenticationConfiguration.ConfigureAuthentication(services);
+
+        services.AddAuthorization();
+        services.AddApplication();
+
+        var connectionString = configuration.GetConnectionString("DbConnection") ??
+            throw new InvalidOperationException("Connection string is not initialized");
+
+        services.AddPersistence(connectionString);
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (!env.IsDevelopment())
+        {
+            app.UseExceptionHandler("/Home/Error");
+            app.UseHsts();
+        }
+
+        app.UseHttpsRedirection();
+        app.UseStaticFiles();
+        app.UseRouting();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Documents}/{action=Index}/{id?}");
+        });
+    }
+}

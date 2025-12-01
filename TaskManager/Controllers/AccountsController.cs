@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TaskManager.Repositories.Interfaces;
-using TaskManager.Services.Interfaces;
-using TaskManager.Utils;
-using TaskManager.ViewModel;
+using TaskManager.Domain.Model.Employees;
+using TaskManager.Domain.Repositories;
+using TaskManager.Domain.Services;
+using TaskManager.View.Utils;
+using TaskManager.View.ViewModel.Employees;
 
-namespace TaskManager.Controllers;
+namespace TaskManager.View.Controllers;
 
 [AllowAnonymous]
 public class AccountsController(
@@ -25,9 +26,9 @@ public class AccountsController(
     }
 
     [HttpPost]
-    public async Task<IActionResult> Login(LoginViewModel loginViewModel, string? returnUrl = null)
+    public async Task<IActionResult> Login(EmployeeLoginModel employeeLoginModel, string? returnUrl = null)
     {
-        var success = await authService.LoginAsync(loginViewModel);
+        var success = await authService.LoginAsync(employeeLoginModel);
 
         if (success)
         {
@@ -40,7 +41,7 @@ public class AccountsController(
         }
 
         ModelState.AddModelError("", "Неверный логин или пароль");
-        return View(loginViewModel);
+        return View(employeeLoginModel);
     }
 
     [HttpPost]
@@ -61,7 +62,7 @@ public class AccountsController(
             return NotFound();
         }
 
-        var passwordViewModel = new PasswordViewModel
+        var passwordViewModel = new EmployeePasswordViewModel
         {
             Id = id,
             Password = employee.Password
@@ -71,7 +72,7 @@ public class AccountsController(
     }
 
     [HttpPost]
-    public async Task<IActionResult> ChangePasswordConfirmed(int id, PasswordViewModel passwordViewModel)
+    public async Task<IActionResult> ChangePasswordConfirmed(int id, EmployeePasswordViewModel passwordViewModel)
     {
         var employee = await employeeRepository.GetByIdAsync(id);
 
@@ -84,6 +85,12 @@ public class AccountsController(
         await employeeRepository.UpdateAsync(employee);
 
         return RedirectToDocuments();
+    }
+
+    [HttpGet]
+    public IActionResult AccessDenied()
+    {
+        return View();
     }
 
     private RedirectToActionResult RedirectToDocuments()

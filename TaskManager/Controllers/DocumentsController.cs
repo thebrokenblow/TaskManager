@@ -1,96 +1,66 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using TaskManager.Filters;
-using TaskManager.Models;
-using TaskManager.Queries.Interfaces;
-using TaskManager.Repositories.Interfaces;
-using TaskManager.Services;
-using TaskManager.Services.Interfaces;
-using TaskManager.ViewModel;
+using TaskManager.Application.Services.Interfaces;
+using TaskManager.Domain.Entities;
+using TaskManager.Domain.Exceptions;
+using TaskManager.Domain.Model.Documents;
+using TaskManager.View.ViewModel.Documents;
+using TaskManager.View.ViewModel.Employees;
 
-namespace TaskManager.Controllers;
+namespace TaskManager.View.Controllers;
 
 public class DocumentsController(
-        IAuthService authService,
-        IDocumentRepository documentRepository,
-        IDocumentQuery documentQuery,
-        IEmployeeRepository employeeRepository) : Controller
+    IDocumentService documentService,
+    IEmployeeService employeeService) : Controller
 {
-    private const int defaultNumberPage = 1;
-    private const int defaultCountDocumentsOnPage = 50;
+    private const int DefaultNumberPage = 1;
+    private const int DefaultCountDocumentsOnPage = 50;
+
+    private const int DefaultDueDateDaysOffset = 5;
 
     [HttpGet]
     public async Task<IActionResult> Index(
         string inputSearch,
-        int page = defaultNumberPage,
-        int pageSize = defaultCountDocumentsOnPage) 
+        int page = DefaultNumberPage,
+        int pageSize = DefaultCountDocumentsOnPage) 
     {
-        int countDocuments;
-        List<FilteredRangeDocument> documents;
-
-        if (authService.IsAdmin)
-        {
-            (documents, countDocuments) = await documentQuery.GetDeletedRangeAsync(inputSearch, (page - 1) * pageSize, pageSize);
-        }
-        else if (!string.IsNullOrWhiteSpace(inputSearch))
-        {
-            (documents, countDocuments) = await documentQuery.GetFilteredRangeAsync(inputSearch, (page - 1) * pageSize, pageSize);
-        }
-        else
-        {
-            (documents, countDocuments) = await documentQuery.GetRangeAsync((page - 1) * pageSize, pageSize);
-        }
-
-        var paginationViewModel = new PaginationViewModel
-        {
-            CurrentPage = page,
-            PageSize = pageSize,
-            TotalCount = countDocuments,
-            TotalPages = (int)Math.Ceiling(countDocuments / (double)pageSize)
-        };
+        var pagedDocuments = await documentService.GetPagedAsync(inputSearch, page, pageSize);
 
         var indexDocumentViewModel = new IndexDocumentViewModel
         {
-            Documents = documents,
             InputString = inputSearch,
-            PaginationViewModel = paginationViewModel
+            PagedDocuments = pagedDocuments
         };
 
         return View(indexDocumentViewModel);
     }
 
     [HttpGet]
-    [AuthenticatedUser]
     public async Task<IActionResult> Create()
     {
         var document = new Document
         {
-            SourceOutputDocumentNumber = string.Empty,
-            SourceOutgoingDocumentDate = DateOnly.FromDateTime(DateTime.Now),
-            SourceOutputDocumentDate = DateOnly.FromDateTime(DateTime.Now),
-            SourceDueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(5)),
-            SourceIsExternal = true,
+            IsExternalDocumentInputDocument = true,
+            IncomingDocumentNumberInputDocument = string.Empty,
+            IncomingDocumentDateInputDocument = DateOnly.FromDateTime(DateTime.Today),
+            TaskDueDateInputDocument = DateOnly.FromDateTime(DateTime.Today.AddDays(DefaultDueDateDaysOffset)),
+            IsExternalDocumentOutputDocument = true,
             IsUnderControl = false,
-            IsCompleted = false
+            IsCompleted = false,
+            CreatedByEmployeeId = default,
         };
 
-        var employees = await employeeRepository.GetAllAsync();
+        var responsibleEmployees = await employeeService.GetResponsibleEmployeesAsync();
 
-        var employeesForSelect = employees.Select(employee => new EmployeeForSelect
-        {
-            Id = employee.Id,
-            FullNameAndDepartment = $"{employee.FullName} ({employee.Department})"
-        });
-
-        var selectListEmployees = new SelectList(
-                                        employeesForSelect,
-                                        nameof(EmployeeForSelect.Id),
-                                        nameof(EmployeeForSelect.FullNameAndDepartment));
+        var responsibleEmployeesSelectList = new SelectList(
+                                                    responsibleEmployees,
+                                                    nameof(EmployeeForSelect.Id),
+                                                    nameof(EmployeeForSelect.FullNameAndDepartment));
 
         var createDocumentViewModel = new CreateDocumentViewModel
         {
             Document = document,
-            Employees = selectListEmployees,
+            ResponsibleEmployees = responsibleEmployeesSelectList,
         };
 
         return View(createDocumentViewModel);
@@ -99,46 +69,33 @@ public class DocumentsController(
     [HttpPost]
     public async Task<IActionResult> Create(Document document)
     {
-        if (authService.CurrentUserId is null)
-        {
-            return RedirectToAction("Index", "Accounts");
-        }
-
-        await documentRepository.AddAsync(document);
+        await documentService.CreateAsync(document);
 
         return RedirectToAction(nameof(Index));
     }
 
     [HttpGet]
-    [AuthenticatedUser]
     public async Task<IActionResult> Edit(int id)
     {
-        var document = await documentRepository.GetByIdAsync(id);
+        var document = await documentService.GetDocumentForEditAsync(id);
 
-        if (document == null)
+        if (document is null)
         {
             return NotFound();
         }
 
-        var employees = await employeeRepository.GetAllAsync();
+        var responsibleEmployees = await employeeService.GetResponsibleEmployeesAsync();
 
-        var employeesForSelect = employees.Select(employee => new EmployeeForSelect
-        {
-            Id = employee.Id,
-            FullNameAndDepartment = $"{employee.FullName} ({employee.Department})"
-        });
 
-        var selectListEmployees = new SelectList(
-                                        employeesForSelect,
-                                        nameof(EmployeeForSelect.Id),
-                                        nameof(EmployeeForSelect.FullNameAndDepartment));
-
-        ViewData[nameof(EmployeeForSelect)] = selectListEmployees;
+        var responsibleEmployeesSelectList = new SelectList(
+                                                    responsibleEmployees,
+                                                    nameof(EmployeeForSelect.Id),
+                                                    nameof(EmployeeForSelect.FullNameAndDepartment));
 
         var editDocumentViewModel = new EditDocumentViewModel
         {
             Document = document,
-            Employees = selectListEmployees
+            ResponsibleEmployees = responsibleEmployeesSelectList
         };
 
         return View(editDocumentViewModel);
@@ -147,18 +104,14 @@ public class DocumentsController(
     [HttpPost]
     public async Task<IActionResult> Edit(Document document)
     {
-        document.LastModifiedDate = DateTime.Now;
-        document.LastModifiedByEmployee = authService.FullName;
-
-        await documentRepository.UpdateAsync(document);
+        await documentService.EditAsync(document);
         return RedirectToAction(nameof(Index));
     }
 
     [HttpGet]
-    [DocumentOwnerAuthorization]
     public async Task<IActionResult> Delete(int id)
     {
-        var document = await documentQuery.GetDetailsByIdAsync(id);
+        var document = await documentService.GetDocumentForDeleteAsync(id);
 
         if (document == null)
         {
@@ -171,52 +124,35 @@ public class DocumentsController(
     [HttpPost]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var document = await documentRepository.GetByIdAsync(id);
+        try
+        {
+            await documentService.DeleteAsync(id);
+            return RedirectToAction(nameof(Index));
+        }
+        catch (NotFoundException)
+        {
+            return RedirectToAction(nameof(Index));
+            //Показать страницу документ не найден в системе
+        }
+        catch
+        {
+            //Показать страницу ошибки
+            return RedirectToAction(nameof(Index));
+        }
+    }
 
-        if (document == null)
-        {
-            return NotFound();
-        }
-
-        if (authService.IsAdmin)
-        {
-            await documentRepository.RemoveAsync(document);
-        }
-        else if (authService.IsAuthenticated)
-        {
-            await documentRepository.ChangeAuthorAsync(document, AuthService.IdAdmin);
-        }
+    [HttpPost]
+    public async Task<IActionResult> RecoverDeleted(int id)
+    {
+        await documentService.RecoverDeletedAsync(id);
 
         return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]
-    public async Task<IActionResult> RecoverDeletedTask(int id)
+    public async Task<IActionResult> ChangeStatus(int id)
     {
-        var document = await documentQuery.GetDetailsByIdAsync(id);
-
-        if (document == null)
-        {
-            return NotFound();
-        }
-
-        await documentRepository.RecoverDeletedTaskAsync(document);
-
-        return RedirectToAction(nameof(Index));
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> ChangeStatusTask(int id)
-    {
-        var document = await documentRepository.GetByIdAsync(id);
-
-        if (document == null)
-        {
-            return NotFound();
-        }
-
-        document.IsCompleted = !document.IsCompleted;
-        await documentRepository.UpdateAsync(document);
+        await documentService.ChangeStatusAsync(id);
 
         return RedirectToAction(nameof(Index));
     }

@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Доступ запрещен";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="card shadow">
+                <div class="card-body py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-ban fa-4x text-danger"></i>
+                    </div>
+
+                    <h1 class="display-6 text-danger mb-3">Доступ запрещен</h1>
+
+                    <p class="lead mb-4">
+                        У вас недостаточно прав для просмотра этой страницы.
+                    </p>
+
+                    <div class="text-muted mb-4">
+                        <p>Если вы считаете, что это ошибка, обратитесь к администратору системы.</p>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a asp-controller="Documents" asp-action="Index" class="btn btn-primary">
+                            К Документам
+                        </a>
+                        <a asp-controller="Employees" asp-action="Index" class="btn btn-outline-secondary">
+                            К Сотрудникам
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

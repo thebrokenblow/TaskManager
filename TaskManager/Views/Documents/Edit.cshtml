@@ -1,7 +1,5 @@
-﻿@using TaskManager.Models
-@using TaskManager.Services
-@using TaskManager.ViewModel
-@using TaskManager.Services.Interfaces
+﻿@using TaskManager.Domain.Services
+@using TaskManager.View.ViewModel.Documents
 
 @model EditDocumentViewModel
 @inject IAuthService authService
@@ -9,218 +7,500 @@
 @{
     ViewData["Title"] = "Редактирование Документа";
 
-    if (ViewData[nameof(EmployeeForSelect)] is not SelectList selecListEmployees)
+    var isNotReadonly = !Model.Document.IsCompleted && (authService.IsAdmin || authService.IdCurrentUser == Model.Document.Id);
+}
+
+@functions {
+    private const string DateFormatDdMmYyyy = "dd.MM.yyyy";
+
+    // Метод для форматирования даты для HTML5 date input (yyyy-MM-dd)
+    string FormatDateForHtml(DateOnly? date)
     {
-        throw new Exception();
+        return date?.ToString("yyyy-MM-dd") ?? "";
     }
 
-    var isNotReadonly = !Model.Document.IsCompleted && (authService.IsAdmin || authService.CurrentUserId == Model.Document.IdAuthorCreateDocument);
+    string FormatDateForHtml(DateOnly date)
+    {
+        return date.ToString("yyyy-MM-dd");
+    }
 }
 
 <style>
     .readonly-disabled {
-        background-color: #e9ecef;
+        background-color: #f8f9fa;
         opacity: 1;
         pointer-events: none;
         cursor: not-allowed;
+        border-color: #dee2e6;
     }
 
-    .readonly-disabled::placeholder {
-        color: #6c757d;
+        .readonly-disabled::placeholder {
+            color: #6c757d;
+        }
+
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
     }
 </style>
 
-<!-- Форма редактирования документа -->
-<div class="card mb-4 mt-5">
-    <div class="card-header">
-        <h5 class="mb-0">Добавить новый документ</h5>
+<div class="container-fluid py-3">
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1">Редактирование документа</h5>
+                    <p class="text-muted mb-0 small">
+                        Редактирование документа в системе документооборота
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card-body">
-        <form method="post" asp-action="Create" class="row g-3" id="documentForm">
-            <!-- Исходные данные документа -->
-            <div class="col-12">
-                <h6 class="border-bottom pb-2">Исходные данные документа</h6>
-            </div>
 
-            <div class="col-md-4">
-                <div class="d-flex align-items-center gap-2">
-                    <label class="form-label mb-0 text-nowrap">Исх.:</label>
-                    <input type="text" class="form-control" asp-for="@Model.Document.SourceOutgoingDocumentNumber">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-primary">
+                <div class="card-header bg-primary text-white py-2">
+                    <h6 class="mb-0">
+                        <i class="fas fa-file-alt me-2"></i>
+                        Редактирование документа
+                    </h6>
                 </div>
-            </div>
 
-            <div class="col-md-4">
-                <div class="d-flex align-items-center gap-2">
-                    <label class="form-label mb-0 text-nowrap">Дата:</label>
-                    <input type="date" class="form-control" asp-for="@Model.Document.SourceOutgoingDocumentDate">
-                </div>
-            </div>
+                <div class="card-body">
+                    <form method="post" asp-action="Edit" class="row g-3">
+                        <!-- Скрытые поля Id -->
+                        <input type="hidden" name="Id" value="@Model.Document.Id" />
+                        <input type="hidden" name="CreatedByEmployeeId" value="@Model.Document.CreatedByEmployeeId" />
 
-            <div class="col-md-4">
-                <div class="d-flex align-items-center gap-2">
-                    <label class="form-label mb-0 text-nowrap">Заказчик:</label>
-                    <input type="text" class="form-control" asp-for="@Model.Document.SourceCustomer">
-                </div>
-            </div>
 
-            <div class="col-12">
-                <textarea class="form-control" placeholder="Краткое содержание документа" asp-for="@Model.Document.SourceTaskText" rows="3"></textarea>
-            </div>
-
-            <div class="col-12">
-                <div class="row align-items-center g-3">
-                    <div class="col-auto">
-                        <div class="form-check">
-                            <input class="form-check-input" asp-for="@Model.Document.SourceIsExternal" id="SourceIsExternal" />
-                            <label class="form-check-label" asp-for="@Model.Document.SourceIsExternal">
-                                Внешний документ
-                            </label>
+                        <!-- Исходные данные документа -->
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 text-primary">
+                                Входные данные документа
+                            </h6>
                         </div>
-                    </div>
 
-                    <div class="col">
-                        <div class="d-flex align-items-center gap-2">
-                            <label class="form-label mb-0 text-nowrap">Вх (46 ЦНИИ): *</label>
-                            <input type="text" class="form-control" asp-for="@Model.Document.SourceOutputDocumentNumber" id="SourceOutputDocumentNumber" required>
+                        <div class="col-12">
+                            <div class="d-flex align-items-center gap-4">
+                                <div class="d-flex align-items-center gap-2 flex-fill">
+                                    <label class="form-label text-nowrap mb-0">
+                                        Исх.:
+                                    </label>
+
+                                    @if (isNotReadonly)
+                                    {
+                                        <input type="text"
+                                               class="form-control"
+                                               name="OutgoingDocumentNumberInputDocument"
+                                               value="@Model.Document.OutgoingDocumentNumberInputDocument"
+                                               placeholder="Введите исходящий номер">
+                                    }
+                                    else
+                                    {
+                                        <input type="text"
+                                               class="form-control readonly-disabled"
+                                               name="OutgoingDocumentNumberInputDocument"
+                                               value="@Model.Document.OutgoingDocumentNumberInputDocument"
+                                               readonly>
+                                    }
+                                </div>
+
+                                <div class="d-flex align-items-center gap-2 flex-fill">
+                                    <label class="form-label text-nowrap mb-0">
+                                        Дата:
+                                    </label>
+
+                                    @if (isNotReadonly)
+                                    {
+                                        <input type="date"
+                                               class="form-control"
+                                               name="SourceDocumentDateInputDocument"
+                                               value="@FormatDateForHtml(Model.Document.SourceDocumentDateInputDocument)">
+                                    }
+                                    else
+                                    {
+                                        <input type="date"
+                                               class="form-control readonly-disabled"
+                                               name="SourceDocumentDateInputDocument"
+                                               value="@FormatDateForHtml(Model.Document.SourceDocumentDateInputDocument)"
+                                               readonly>
+                                    }
+                                </div>
+
+                                <div class="d-flex align-items-center gap-2 flex-fill">
+                                    <label class="form-label text-nowrap mb-0">
+                                        Заказчик:
+                                    </label>
+
+                                    @if (isNotReadonly)
+                                    {
+                                        <input type="text"
+                                               class="form-control"
+                                               name="CustomerInputDocument"
+                                               value="@Model.Document.CustomerInputDocument"
+                                               placeholder="Введите название заказчика">
+                                    }
+                                    else
+                                    {
+                                        <input type="text"
+                                               class="form-control readonly-disabled"
+                                               name="CustomerInputDocument"
+                                               value="@Model.Document.CustomerInputDocument"
+                                               readonly>
+                                    }
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="col">
-                        <div class="d-flex align-items-center gap-2">
-                            <label class="form-label mb-0 text-nowrap">Дата: *</label>
-                            <input type="date" class="form-control" asp-for="@Model.Document.SourceOutputDocumentDate" required>
+                        <div class="col-12">
+                            @if (isNotReadonly)
+                            {
+                                <textarea class="form-control"
+                                      name="DocumentSummaryInputDocument"
+                                      placeholder="Краткое содержание документа"
+                                      rows="3">@Model.Document.DocumentSummaryInputDocument</textarea>
+                            }
+                            else
+                            {
+                                <textarea class="form-control readonly-disabled"
+                                      name="DocumentSummaryInputDocument"
+                                      rows="3"
+                                      readonly>@Model.Document.DocumentSummaryInputDocument</textarea>
+                            }
                         </div>
-                    </div>
+
+                        <div class="col-12">
+                            <div class="d-flex align-items-center gap-4">
+                                <div class="form-check mb-0">
+
+                                    @if (isNotReadonly)
+                                    {
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="IsExternalDocumentInputDocument"
+                                               value="true"
+                                               @(Model.Document.IsExternalDocumentInputDocument ? "checked" : "")>
+                                        <input type="hidden" name="IsExternalDocumentInputDocument" value="false">
+                                    }
+                                    else
+                                    {
+                                        <input class="form-check-input readonly-disabled"
+                                               type="checkbox"
+                                               @(Model.Document.IsExternalDocumentInputDocument ? "checked" : "")
+                                               readonly disabled>
+                                        <input type="hidden"
+                                               name="IsExternalDocumentInputDocument"
+                                               value="@(Model.Document.IsExternalDocumentInputDocument ? "true" : "false")">
+                                    }
+                                    <label class="form-check-label text-nowrap">
+                                        Внешний документ
+                                    </label>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-2 flex-fill">
+                                    <label class="form-label text-nowrap mb-0 required-field">
+                                        Вх(46 ЦНИИ):
+                                    </label>
+
+                                    @if (isNotReadonly)
+                                    {
+                                        <input type="text"
+                                               class="form-control"
+                                               name="IncomingDocumentNumberInputDocument"
+                                               value="@Model.Document.IncomingDocumentNumberInputDocument"
+                                               placeholder="Введите входящий номер"
+                                               required>
+                                    }
+                                    else
+                                    {
+                                        <input type="text"
+                                               class="form-control readonly-disabled"
+                                               name="IncomingDocumentNumberInputDocument"
+                                               value="@Model.Document.IncomingDocumentNumberInputDocument"
+                                               readonly>
+                                    }
+                                </div>
+
+                                <div class="d-flex align-items-center gap-2 flex-fill">
+                                    <label class="form-label text-nowrap mb-0 required-field">
+                                        Дата:
+                                    </label>
+
+                                    @if (isNotReadonly)
+                                    {
+                                        <input type="date"
+                                               class="form-control"
+                                               name="IncomingDocumentDateInputDocument"
+                                               value="@FormatDateForHtml(Model.Document.IncomingDocumentDateInputDocument)"
+                                               required>
+                                    }
+                                    else
+                                    {
+                                        <input type="date"
+                                               class="form-control readonly-disabled"
+                                               name="IncomingDocumentDateInputDocument"
+                                               value="@FormatDateForHtml(Model.Document.IncomingDocumentDateInputDocument)"
+                                               readonly>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="d-flex align-items-end gap-4">
+                                <div class="d-flex align-items-center gap-2 flex-fill">
+                                    <label class="form-label text-nowrap mb-0">
+                                        Ответственные отделы:
+                                    </label>
+
+                                    @if (isNotReadonly)
+                                    {
+                                        <input type="text"
+                                               class="form-control"
+                                               name="ResponsibleDepartmentsInputDocument"
+                                               value="@Model.Document.ResponsibleDepartmentsInputDocument"
+                                               placeholder="Введите отделы через запятую">
+                                    }
+                                    else
+                                    {
+                                        <input type="text"
+                                               class="form-control readonly-disabled"
+                                               name="ResponsibleDepartmentsInputDocument"
+                                               value="@Model.Document.ResponsibleDepartmentsInputDocument"
+                                               readonly>
+                                    }
+                                </div>
+
+                                <div class="d-flex align-items-center gap-2 flex-fill">
+                                    <label class="form-label text-nowrap mb-0 required-field">
+                                        Выполнить до:
+                                    </label>
+
+                                    @if (isNotReadonly)
+                                    {
+                                        <input type="date"
+                                               class="form-control"
+                                               name="TaskDueDateInputDocument"
+                                               value="@FormatDateForHtml(Model.Document.TaskDueDateInputDocument)"
+                                               required>
+                                    }
+                                    else
+                                    {
+                                        <input type="date"
+                                               class="form-control readonly-disabled"
+                                               name="TaskDueDateInputDocument"
+                                               value="@FormatDateForHtml(Model.Document.TaskDueDateInputDocument)"
+                                               readonly>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="d-flex align-items-end gap-4">
+                                <label class="form-label text-nowrap">
+                                    Ответственный сотрудник:
+                                </label>
+
+                                <select name="IdResponsibleEmployeeInputDocument"
+                                        class="form-control"
+                                        @(!isNotReadonly ? "disabled" : "")>
+                                    <option value="">Выберите сотрудника</option>
+                                    @foreach (var employee in Model.ResponsibleEmployees)
+                                    {
+                                        var isSelected = employee.Value == Model.Document.IdResponsibleEmployeeInputDocument?.ToString();
+                                        <option value="@employee.Value" selected="@isSelected">
+                                            @employee.Text
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Выходные данные документа -->
+                        <div class="col-12 mt-4">
+                            <h6 class="border-bottom pb-2 text-primary">
+                                Выходные данные документа
+                            </h6>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="d-flex align-items-center gap-4">
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="IsExternalDocumentOutputDocument"
+                                           value="true"
+                                           @(Model.Document.IsExternalDocumentOutputDocument ? "checked" : "")
+                                           @(!isNotReadonly ? "disabled" : "")>
+                                    <input type="hidden" name="IsExternalDocumentOutputDocument" value="false" />
+
+                                    <label class="form-check-label text-nowrap">
+                                        Внешний документ
+                                    </label>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-2 flex-fill">
+                                    <label class="form-label text-nowrap mb-0">
+                                        Исх (46 ЦНИИ):
+                                    </label>
+
+                                    <input type="text"
+                                           class="form-control outgoing-number-output"
+                                           name="OutgoingDocumentNumberOutputDocument"
+                                           value="@Model.Document.OutgoingDocumentNumberOutputDocument"
+                                           placeholder="Номер исходящего"
+                                           @(!isNotReadonly ? "readonly" : "")>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-2 flex-fill">
+                                    <label class="form-label text-nowrap mb-0">
+                                        Дата исходящего:
+                                    </label>
+
+                                    <input type="date"
+                                           class="form-control"
+                                           name="OutgoingDocumentDateOutputDocument"
+                                           value="@FormatDateForHtml(Model.Document.OutgoingDocumentDateOutputDocument)"
+                                           @(!isNotReadonly ? "readonly" : "")>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-2 flex-fill">
+                                    <label class="form-label text-nowrap mb-0">
+                                        Получатель:
+                                    </label>
+
+                                    <input type="text"
+                                           class="form-control"
+                                           name="RecipientOutputDocument"
+                                           value="@Model.Document.RecipientOutputDocument"
+                                           placeholder="Введите получателя"
+                                           @(!isNotReadonly ? "readonly" : "")>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Краткое содержание:</label>
+                            <textarea placeholder="Краткое содержание документа"
+                                      class="form-control"
+                                      name="DocumentSummaryOutputDocument"
+                                      rows="3"
+                                      @(!isNotReadonly ? "readonly" : "")>@Model.Document.DocumentSummaryOutputDocument</textarea>
+                        </div>
+
+                        <!-- Статусы -->
+                        <div class="col-12">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        @if (isNotReadonly)
+                                        {
+                                            <input class="form-check-input"
+                                                   type="checkbox"
+                                                   name="IsUnderControl"
+                                                   value="true"
+                                                   @(Model.Document.IsUnderControl ? "checked" : "")>
+                                            <input type="hidden" name="IsUnderControl" value="false" />
+                                        }
+                                        else
+                                        {
+                                            <input class="form-check-input readonly-disabled"
+                                                   name="IsUnderControl"
+                                                   value="@Model.Document.IsUnderControl"
+                                                   @(Model.Document.IsUnderControl ? "checked" : "")
+                                                   readonly>
+                                            <input type="hidden" name="IsUnderControl"
+                                                   value="@(Model.Document.IsUnderControl ? "true" : "false")" />
+                                        }
+
+                                        <label class="form-check-label text-nowrap text-uppercase fw-bold">
+                                            На контроле
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Контроль и действия -->
+                        <div class="col-12 mt-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div></div>
+
+                                <div>
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        Сохранить
+                                    </button>
+
+                                    <a asp-action="Index" class="btn btn-secondary px-4">
+                                        Назад к списку
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
-
-            <!-- Остальная часть формы без изменений -->
-            <div class="col-12">
-                <div class="d-flex align-items-center gap-2 w-100">
-                    <div class="d-flex align-items-center gap-2 flex-fill">
-                        <label class="form-label mb-0 text-nowrap">Отвественный (-ые) отдел (-ы):</label>
-                        <input type="text" class="form-control" asp-for="@Model.Document.SourseResponsibleDepartment">
-                    </div>
-                    <div class="d-flex align-items-center gap-2 flex-fill">
-                        <label class="form-label mb-0 text-nowrap">Выполнить до: *</label>
-                        <input type="date" class="form-control" asp-for="@Model.Document.SourceDueDate" required>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12">
-                <div class="d-flex align-items-center gap-2">
-                    <label class="form-label mb-0 text-nowrap">Ответственный сотрудник:</label>
-                    <select asp-for="@Model.Document.IdAuthorCreateDocument"
-                            class="form-control"
-                            asp-items="@Model.Employees">
-                        <option value="">Выберите сотрудника</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Выходные данные документа -->
-            <div class="col-12 mt-4">
-                <h6 class="border-bottom pb-2">Выходные данные документа</h6>
-            </div>
-
-            <div class="col-12">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="form-check mb-0">
-                        <input class="form-check-input" asp-for="@Model.Document.SourceIsExternal" checked />
-                        <label class="form-check-label" asp-for="@Model.Document.SourceIsExternal">
-                            Внешний документ
-                        </label>
-                    </div>
-                    <div class="d-flex align-items-center gap-2 flex-fill">
-                        <label class="form-label mb-0 text-nowrap">Исх (46 ЦНИИ):</label>
-                        <input type="text" class="form-control" asp-for="@Model.Document.OutputOutgoingNumber">
-                    </div>
-
-                    <div class="d-flex align-items-center gap-2 flex-fill">
-                        <label class="form-label mb-0 text-nowrap">Дата:</label>
-                        <input type="date" class="form-control" asp-for="@Model.Document.OutputOutgoingDate">
-                    </div>
-
-                    <div class="d-flex align-items-center gap-2 flex-fill">
-                        <label class="form-label mb-0 text-nowrap">Получатель:</label>
-                        <input type="text" class="form-control" asp-for="@Model.Document.OutputSentTo">
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12">
-                <div class="d-flex align-items-center gap-2">
-                    <textarea placeholder="Краткое содержание документа" class="form-control" asp-for="@Model.Document.OutputContentAnswer"></textarea>
-                </div>
-            </div>
-
-            <div class="col-12">
-                <div class="d-flex justify-content-between">
-                    <div class="form-check">
-                        <input class="form-check-input" asp-for="@Model.Document.IsUnderControl" />
-                        <label class="form-check-label text-uppercase" asp-for="@Model.Document.IsUnderControl">
-                            На контроле
-                        </label>
-                    </div>
-                    <div>
-                        <button type="submit" class="btn btn-success">Создать</button>
-                        <a asp-action="Index" class="btn btn-secondary">Назад к списку</a>
-                    </div>
-                </div>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            console.log('DOM loaded');
+            const externalInputCheckbox = document.querySelector('input[name="IsExternalDocumentInputDocument"]');
+            const incomingNumberInput = document.querySelector('input[name="IncomingDocumentNumberInputDocument"]');
 
-            const externalCheckbox = document.getElementById('SourceIsExternal');
-            const outputDocumentInput = document.getElementById('SourceOutputDocumentNumber');
+            const externalOutputCheckbox = document.querySelector('input[name="IsExternalDocumentOutputDocument"]');
+            const outgoingNumberOutput = document.querySelector('input[name="OutgoingDocumentNumberOutputDocument"]');
 
-            console.log('Checkbox found:', externalCheckbox);
-            console.log('Input found:', outputDocumentInput);
+            function updateIncomingDocumentField() {
+                if (externalInputCheckbox && externalInputCheckbox.checked) {
+                    incomingNumberInput.removeAttribute('readonly');
+                    incomingNumberInput.classList.remove('readonly-disabled');
+                    incomingNumberInput.placeholder = 'Введите входящий номер';
+                    incomingNumberInput.required = true;
 
-            if (!externalCheckbox || !outputDocumentInput) {
-                console.error('Elements not found!');
-                return;
-            }
-
-            function updateOutputDocumentField() {
-                console.log('Checkbox changed, checked:', externalCheckbox.checked);
-                console.log('Current input value:', outputDocumentInput.value);
-
-                if (externalCheckbox.checked) {
-                    // Если внешний документ - разрешаем ввод
-                    outputDocumentInput.removeAttribute('readonly');
-                    outputDocumentInput.classList.remove('readonly-disabled');
-                    outputDocumentInput.placeholder = 'Введите номер документа';
-
-                    // Если текущее значение "нет" - очищаем поле
-                    if (outputDocumentInput.value === 'нет') {
-                        outputDocumentInput.value = '';
+                    if (incomingNumberInput.value === 'нет') {
+                        incomingNumberInput.value = '';
                     }
-                } else {
-                    // Если не внешний документ - ставим "нет" и блокируем
-                    outputDocumentInput.value = 'нет';
-                    outputDocumentInput.setAttribute('readonly', 'readonly');
-                    outputDocumentInput.classList.add('readonly-disabled');
-                    outputDocumentInput.placeholder = 'Автоматически установлено в "нет"';
-                }
 
-                console.log('New input value:', outputDocumentInput.value);
+                } else {
+                    incomingNumberInput.value = 'нет';
+                    incomingNumberInput.setAttribute('readonly', 'readonly');
+                    incomingNumberInput.classList.add('readonly-disabled');
+                    incomingNumberInput.required = false;
+                }
             }
 
-            // Обработчик изменения чекбокса
-            externalCheckbox.addEventListener('change', updateOutputDocumentField);
+            function updateOutgoingDocumentField() {
+                if (externalOutputCheckbox && externalOutputCheckbox.checked) {
+                    outgoingNumberOutput.removeAttribute('readonly');
+                    outgoingNumberOutput.classList.remove('readonly-disabled');
+                    outgoingNumberOutput.placeholder = 'Введите исходящий номер';
 
-            // Инициализация при загрузке страницы
-            updateOutputDocumentField();
+                    if (outgoingNumberOutput.value === 'нет') {
+                        outgoingNumberOutput.value = '';
+                    }
 
-            console.log('Event listener attached');
+                } else {
+                    outgoingNumberOutput.value = 'нет';
+                    outgoingNumberOutput.setAttribute('readonly', 'readonly');
+                    outgoingNumberOutput.classList.add('readonly-disabled');
+                }
+            }
+
+            if (externalInputCheckbox && incomingNumberInput) {
+                externalInputCheckbox.addEventListener('change', updateIncomingDocumentField);
+                updateIncomingDocumentField();
+            }
+
+            if (externalOutputCheckbox && outgoingNumberOutput) {
+                externalOutputCheckbox.addEventListener('change', updateOutgoingDocumentField);
+                updateOutgoingDocumentField();
+            }
         });
     </script>
 }

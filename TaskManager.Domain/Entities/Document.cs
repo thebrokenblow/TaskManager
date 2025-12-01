@@ -6,6 +6,11 @@
 /// </summary>
 public class Document
 {
+    /// <summary>
+    /// Уникальный идентификатор документа в системе.
+    /// </summary>
+    public int Id { get; set; }
+
     //Входные данные документа
 
     /// <summary>
@@ -93,7 +98,7 @@ public class Document
     /// Дата исходящий документа. Выходные данные документа. Заполняет исполнитель.
     /// Необязательное свойство.
     /// </summary>
-    public required DateOnly? OutgoingDocumentDateOutputDocument { get; set; }
+    public DateOnly? OutgoingDocumentDateOutputDocument { get; set; }
 
     /// <summary>
     /// Получатель. Выходные данные документа. Заполняет исполнитель.
@@ -114,15 +119,58 @@ public class Document
     public required bool IsUnderControl { get; set; }
 
     /// <summary>
-    /// Идентификатор сотрудника, который последним редактировал документ. Выходные данные документа.
-    /// Необязательное свойство.
+    /// Признак завершения задачи. Заполняет исполнитель.
+    /// Обязательное свойство.
     /// </summary>
-    public int? IdLastEditedEmployee { get; set; }
+    public required bool IsCompleted { get; set; }
 
     /// <summary>
-    /// Сотрудник, который последним редактировал документ. Выходные данные документа.
+    /// Идентификатор сотрудника, который создал документ.
+    /// Обязательное свойство.
+    /// </summary>
+    public required int CreatedByEmployeeId { get; set; }
+
+    /// <summary>
+    /// Сотрудник, который создал документ.
+    /// Навигационное свойство.
+    /// </summary>
+    public Employee? CreatedByEmployee { get; set; }
+
+    /// <summary>
+    /// Идентификатор сотрудника, который последним редактировал документ.
+    /// Необязательное свойство.
+    /// </summary>
+    public int? LastEditedByEmployeeId { get; set; }
+
+    /// <summary>
+    /// Сотрудник, который последним редактировал документ.
     /// Навигационное свойство.
     /// Необязательное свойство.
     /// </summary>
-    public Employee? LastEditedEmployee { get; set; }
+    public Employee? LastEditedByEmployee { get; set; }
+
+    /// <summary>
+    /// Дата и время последнего редактирования документа.
+    /// Необязательное свойство.
+    /// </summary>
+    public DateTime? LastEditedDateTime { get; set; }
+
+    /// <summary>
+    /// Идентификатор сотрудника, который удалил запись.
+    /// Необязательное свойство.
+    /// </summary>
+    public int? RemovedByEmployeeId { get; set; }
+
+    /// <summary>
+    /// Сотрудник, который удалил запись.
+    /// Навигационное свойство.
+    /// Необязательное свойство.
+    /// </summary>
+    public Employee? RemovedByEmployee { get; set; }
+
+    /// <summary>
+    /// Дата удаления документа.
+    /// Необязательное свойство.
+    /// </summary>
+    public DateTime? RemoveDateTime { get; set; }
 }

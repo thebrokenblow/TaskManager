@@ -1,72 +1,119 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TaskManager.Filters;
-using TaskManager.Models;
-using TaskManager.Repositories.Interfaces;
-using TaskManager.ViewModel;
+using System.Text.Json;
+using TaskManager.Application.Services.Interfaces;
+using TaskManager.Domain.Entities;
+using TaskManager.Domain.Exceptions;
+using TaskManager.View.Filters;
+using TaskManager.View.ViewModel.Employees;
 
-namespace TaskManager.Controllers;
+namespace TaskManager.View.Controllers;
 
-public class EmployeesController(IEmployeeRepository employeeRepository) : Controller
+public class EmployeesController(IEmployeeService employeeService) : Controller
 {
-    private const string DefaultPassword = "Qwerty123";
+    private const string FailedCreatedEmployeeKey = "FailedCreatedEmployee";
+    private const string TextFailedCreatedEmployeeKey = "TextFailedCreatedEmployee";
+    
+    public const string TextFailedEditedEmployeeKey = "TextFailedEditedEmployeeKey";
 
     [HttpGet]
-    public async Task<IActionResult> Index(Employee? employee)
+    public async Task<IActionResult> Index()
     {
-        var employees = await employeeRepository.GetAllAsync();
-
-        var indexEmployeesViewModel = new IndexEmployeesViewModel
+        try
         {
-            Employees = employees,
-            FailedCreatedEmployee = employee,
-        };
+            var employees = await employeeService.GetAllAsync();
 
-        return View(indexEmployeesViewModel);
+            var indexEmployeesViewModel = new IndexEmployeesViewModel
+            {
+                Employees = employees
+            };
+
+            if (TempData.TryGetValue(FailedCreatedEmployeeKey, out var failedEmployeeJson) &&
+                TempData.TryGetValue(TextFailedCreatedEmployeeKey, out var textFailed))
+            {
+                if (failedEmployeeJson is not null)
+                {
+                    var failedEmployee = JsonSerializer.Deserialize<Employee>((string)failedEmployeeJson);
+                    indexEmployeesViewModel.FailedCreatedEmployee = failedEmployee;
+                }
+
+                if (textFailed is not null)
+                {
+                    indexEmployeesViewModel.TextFailedCreatedEmployee = textFailed.ToString();
+                }
+            }
+
+            TempData.Remove(FailedCreatedEmployeeKey);
+            TempData.Remove(TextFailedCreatedEmployeeKey);
+
+            return View(indexEmployeesViewModel);
+        }
+        catch
+        {
+            return RedirectToAction(nameof(Index));
+        }
     }
 
     [HttpPost]
-    [AuthenticationAdmin]
     public async Task<IActionResult> Create(Employee employee)
     {
-        var employeeWithSameLogin = await employeeRepository.GetByLoginAsync(employee.Login.ToLower());
-
-        if (employeeWithSameLogin is not null)
+        try
         {
-            TempData["Error"] = "Пользователь с таким логином уже существует в системе";
-            return RedirectToAction(nameof(Index), employee);
+            await employeeService.CreateAsync(employee);
+            return RedirectToAction(nameof(Index));
         }
-        else
+        catch (LoginAlreadyExistsException)
         {
-            employee.Login = employee.Login.ToLower();
-            employee.Password = DefaultPassword;
-            employee.Role = RolesDictionary.Employee;
+            TempData[FailedCreatedEmployeeKey] = JsonSerializer.Serialize(employee);
+            TempData[TextFailedCreatedEmployeeKey] = "Сотрудник с таким логином уже существует в системе";
 
-            await employeeRepository.AddAsync(employee);
+            return RedirectToAction(nameof(Index));
         }
-
-        return RedirectToAction(nameof(Index));
+        catch
+        {
+            TempData[TextFailedCreatedEmployeeKey] = "Произошла ошибка при создании сотрудника";
+            return RedirectToAction(nameof(Index));
+        }
     }
 
     [HttpGet]
-    [AuthenticationAdmin]
+    [AdminOnly]
     public async Task<IActionResult> Edit(int id)
     {
-        var employee = await employeeRepository.GetByIdAsync(id);
-
-        if (employee == null)
+        try
         {
-            return NotFound();
-        }
+            var employee = await employeeService.GetByIdAsync(id);
 
-        return View(employee);
+            if (employee is null)
+            {
+                return NotFound();
+            }
+
+            return View(employee);
+        }
+        catch
+        {
+            return RedirectToAction(nameof(Index));
+        }
     }
 
     [HttpPost]
-    [AuthenticationAdmin]
+    [AdminOnly]
     public async Task<IActionResult> Edit(Employee employee)
     {
-        await employeeRepository.UpdateAsync(employee);
+        try
+        {
+            await employeeService.EditAsync(employee);
+            return RedirectToAction(nameof(Index));
+        }
+        catch (LoginAlreadyExistsException)
+        {
+            TempData[TextFailedEditedEmployeeKey] = "Сотрудник с таким логином уже существует в системе";
 
-        return RedirectToAction(nameof(Index));
+            return View(employee);
+        }
+        catch
+        {
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

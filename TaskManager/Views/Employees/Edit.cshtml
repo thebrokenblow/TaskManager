@@ -1,40 +1,87 @@
-﻿@using TaskManager.Models
+﻿@using TaskManager.Domain.Entities
+@using TaskManager.View.Controllers
+
 @model Employee
 
-<!-- Форма редактирования сотрудника -->
-<div class="card mb-4">
-    <div class="card-header">
-        <h5 class="mb-0">Редактирование сотрудника</h5>
-    </div>
-    <div class="card-body">
-        <form method="post" asp-controller="Employees" asp-action="Edit" class="row g-3">
-            <input type="hidden" class="form-control" value="@Model.Id" id="Id" name="Id">
-            <input type="hidden" class="form-control" value="@Model.Role" id="Role" name="Role">
-            <input type="hidden" class="form-control" value="@Model.Password" id="Password" name="Password">
+@{
+    ViewData["Title"] = "Редактирование сотрудника";
+}
 
-            <div class="col-md-3">
-                <label for="LastName" class="form-label">Фамилия и инициалы *</label>
-                <input type="text" class="form-control" value="@Model.FullName" id="FullName" name="FullName" required>
+<style>
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+</style>
+
+<div class="container-fluid py-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-edit me-1"></i>Редактирование сотрудника
+                        </h5>
+                    </div>
+                </div>
+                <div class="card-body p-3">
+                    <form method="post" asp-controller="Employees" asp-action="Edit" class="row g-3 needs-validation">
+
+                        @if (TempData[EmployeesController.TextFailedEditedEmployeeKey] is not null)
+                        {
+                            <div class="col-12">
+                                <div class="alert alert-danger alert-dismissible fade show py-2" role="alert">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    @TempData[EmployeesController.TextFailedEditedEmployeeKey]
+                                </div>
+                            </div>
+                        }
+
+                        <input type="hidden" class="form-control" value="@Model.Id" id="Id" name="Id">
+                        <input type="hidden" class="form-control" value="@Model.Role" id="Role" name="Role">
+                        <input type="hidden" class="form-control" value="@Model.Password" id="Password" name="Password">
+
+                        <div class="col-md-4">
+                            <label for="FullName" class="form-label required-field">
+                                <i class="fas fa-user me-2 text-muted"></i>Фамилия и инициалы
+                            </label>
+                            <input type="text" class="form-control" value="@Model.FullName"
+                                   id="FullName" name="FullName" placeholder="Введите ФИО" required>
+                            <div class="invalid-feedback">Введите фамилию и инициалы</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="Department" class="form-label required-field">
+                                <i class="fas fa-building me-2 text-muted"></i>Подразделение
+                            </label>
+                            <input type="text" class="form-control" value="@Model.Department"
+                                   id="Department" name="Department" placeholder="Введите подразделение" required>
+                            <div class="invalid-feedback">Введите подразделение</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="Login" class="form-label required-field">
+                                <i class="fas fa-user-circle me-2 text-muted"></i>Логин
+                            </label>
+                            <input type="text" class="form-control" value="@Model.Login"
+                                   id="Login" name="Login" placeholder="Введите логин" required>
+                            <div class="invalid-feedback">Введите логин</div>
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary px-3">
+                                    <i class="fas fa-save me-2"></i>Сохранить
+                                </button>
+                                <a asp-controller="Employees" asp-action="Index" class="btn btn-outline-secondary px-3">
+                                    <i class="fas fa-arrow-left me-2"></i>Назад
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="col-md-3">
-                <label for="CabinetNumber" class="form-label">Подразделение *</label>
-                <input type="text" class="form-control" value="@Model.Department" id="Department" name="Department" required>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Логин *</label>
-                <input type="text" class="form-control" value="@Model.Login" id="Login" name="Login" required>
-            </div>
-            <div class="d-flex gap-2">
-                <button type="submit"
-                        class="btn btn-success">
-                    <i class="bi bi-trash"></i> Редактировать
-                </button>
-                <a asp-controller="Employees"
-                   asp-action="Index"
-                   class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Назад к списку
-                </a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
