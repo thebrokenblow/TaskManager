@@ -1,9 +1,6 @@
-﻿@{
+﻿@using TaskManager.View.Utils
+@{
     ViewData["Title"] = "Документ не найден";
-}
-
-@functions {
-    private const string DateFormatDdMmYyyyHhMm = "dd.MM.yyyy HH:mm";
 }
 
 <div class="container mt-5">
@@ -59,7 +56,7 @@
                         </p>
                         <p class="text-muted small">
                             <i class="far fa-clock me-1"></i>
-                            @DateTime.Now.ToString(DateFormatDdMmYyyyHhMm)
+                            @DateTime.Now.ToString(DateFormatDictionary.DateTimeFormatDdMmYyyyHhMm)
                         </p>
                     </div>
                 </div>

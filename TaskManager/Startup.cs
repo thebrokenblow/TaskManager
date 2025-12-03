@@ -5,6 +5,7 @@ using TaskManager.Persistence;
 using TaskManager.View.Configurations;
 using TaskManager.View.Middlewares;
 using TaskManager.View.Services;
+using TaskManager.View.Utils;
 
 namespace TaskManager.View;
 
@@ -15,6 +16,7 @@ public class Startup(IConfiguration configuration)
         services.AddHttpContextAccessor();
         services.AddControllersWithViews();
 
+        services.AddScoped<DocumentStyler>();
         services.AddScoped<IAuthService, AuthService>();
 
         AuthenticationConfiguration.ConfigureAuthentication(services);
