@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TaskManager.Domain.Entities;
+using TaskManager.Domain.Enums;
 using TaskManager.Domain.Model.Documents;
 using TaskManager.Domain.Queries;
 using TaskManager.Persistence.Data;
@@ -7,11 +9,42 @@ namespace TaskManager.Persistence.Queries;
 
 public class DocumentQuery(TaskManagerDbContext context) : IDocumentQuery
 {
-    public async Task<(List<DocumentForOverviewModel> documents, int countDocuments)> GetDocumentsAsync(int countSkip, int countTake)
+    public async Task<(List<DocumentForOverviewModel> documents, int countDocuments)> GetDocumentsAsync(
+        string? searchTerm, 
+        int countSkip, 
+        int countTake,
+        DocumentStatus documentStatus)
     {
         var queryDocuments = context.Documents.Include(document => document.ResponsibleEmployeeInputDocument)
-                                              .Where(document => document.IsCompleted == false && document.RemoveDateTime == null)
                                               .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            queryDocuments = queryDocuments.Where(document =>
+                                    (document.OutgoingDocumentNumberInputDocument != null &&
+                                        EF.Functions.ILike(document.OutgoingDocumentNumberInputDocument, $"%{searchTerm}%")) ||
+
+                                    (document.DocumentSummaryInputDocument != null &&
+                                        EF.Functions.ILike(document.DocumentSummaryInputDocument, $"%{searchTerm}%")) ||
+
+                                    (document.IncomingDocumentNumberInputDocument != null &&
+                                        EF.Functions.ILike(document.IncomingDocumentNumberInputDocument, $"%{searchTerm}%")) ||
+
+                                    (document.OutgoingDocumentNumberOutputDocument != null &&
+                                        EF.Functions.ILike(document.OutgoingDocumentNumberOutputDocument, $"%{searchTerm}%")));
+        }
+        else
+        {
+            if (documentStatus == DocumentStatus.Active)
+            {
+                queryDocuments = GetFilterActiveDocumentsAsync(queryDocuments);
+            }
+
+            if (documentStatus == DocumentStatus.Archived)
+            {
+                queryDocuments = GetFilterArchivedDocumentsAsync(queryDocuments);
+            }
+        }
 
         var countDocuments = await queryDocuments.CountAsync();
 
@@ -48,55 +81,21 @@ public class DocumentQuery(TaskManagerDbContext context) : IDocumentQuery
         return (documents, countDocuments);
     }
 
-    public async Task<(List<DocumentForOverviewModel> documents, int countDocuments)> SearchDocumentsAsync(
-        string inputSearch,
-        int countSkip,
-        int countTake)
+    public static IQueryable<Document> GetFilterActiveDocumentsAsync(IQueryable<Document> queryDocuments)
     {
-        var queryDocuments = context.Documents.Include(document => document.ResponsibleEmployeeInputDocument)
-                                              .AsQueryable();
+        queryDocuments = queryDocuments.Where(document => !document.IsCompleted &&
+                                                           document.RemovedByEmployeeId == null &&
+                                                           document.RemoveDateTime == null);
 
-        if (!string.IsNullOrWhiteSpace(inputSearch))
-        {
-            queryDocuments = queryDocuments.Where(document =>
-                                        (document.OutgoingDocumentNumberInputDocument != null && document.OutgoingDocumentNumberInputDocument.Contains(inputSearch)) ||
-                                        (document.DocumentSummaryInputDocument != null && document.DocumentSummaryInputDocument.Contains(inputSearch)) ||
-                                        (document.IncomingDocumentNumberInputDocument != null && document.IncomingDocumentNumberInputDocument.Contains(inputSearch)) ||
-                                        (document.OutgoingDocumentNumberOutputDocument != null && document.OutgoingDocumentNumberOutputDocument.Contains(inputSearch)));
-        }
+        return queryDocuments;
+    }
 
-        var countDocuments = await queryDocuments.CountAsync();
+    public static IQueryable<Document> GetFilterArchivedDocumentsAsync(IQueryable<Document> queryDocuments)
+    {
+        queryDocuments = queryDocuments.Where(document => document.RemovedByEmployeeId != null &&
+                                                          document.RemoveDateTime != null);
 
-        var documents = await queryDocuments.OrderBy(document => document.TaskDueDateInputDocument)
-                                            .ThenBy(document => document.IsUnderControl)
-                                            .Select(document => new DocumentForOverviewModel
-                                            {
-                                                Id = document.Id,
-                                                OutgoingDocumentNumberInputDocument = document.OutgoingDocumentNumberInputDocument,
-                                                DocumentSummaryInputDocument = document.DocumentSummaryInputDocument,
-                                                IncomingDocumentNumberInputDocument = document.IncomingDocumentNumberInputDocument,
-                                                CustomerInputDocument = document.CustomerInputDocument,
-                                                TaskDueDateInputDocument = document.TaskDueDateInputDocument,
-                                                OutgoingDocumentNumberOutputDocument = document.OutgoingDocumentNumberOutputDocument,
-                                                OutgoingDocumentDateOutputDocument = document.OutgoingDocumentDateOutputDocument,
-                                                CreatedByEmployeeId = document.CreatedByEmployeeId,
-
-                                                FullNameResponsibleEmployee =
-                                                    document.ResponsibleEmployeeInputDocument != null ? 
-                                                    document.ResponsibleEmployeeInputDocument.FullName : 
-                                                    null,
-
-                                                RemovedByEmployeeId = document.RemovedByEmployeeId,
-                                                RemoveDateTime = document.RemoveDateTime,
-                                                IsCompleted = document.IsCompleted,
-                                                IsUnderControl = document.IsUnderControl,
-                                            })
-                                            .AsNoTracking()
-                                            .Skip(countSkip)
-                                            .Take(countTake)
-                                            .ToListAsync();
-
-        return (documents, countDocuments);
+        return queryDocuments;
     }
 
     public async Task<DocumentForEditModel?> GetDocumentForEditAsync(int id)
@@ -182,6 +181,23 @@ public class DocumentQuery(TaskManagerDbContext context) : IDocumentQuery
                                                          .FirstOrDefaultAsync();
 
         return removedByEmployeeId;
+    }
+
+
+    public async Task<int?> GetIdEmployeeCreatedAsync(int id)
+    {
+        var isExist = await context.Documents.AnyAsync(document => document.Id == id);
+
+        if (!isExist)
+        {
+            return null;
+        }
+
+        var createdByEmployeeId = await context.Documents.Where(document => document.Id == id)
+                                                         .Select(document => document.CreatedByEmployeeId)
+                                                         .FirstOrDefaultAsync();
+
+        return createdByEmployeeId;
     }
 
     public async Task<DocumentForChangeStatusModel?> GetDocumentForChangeStatusAsync(int id)

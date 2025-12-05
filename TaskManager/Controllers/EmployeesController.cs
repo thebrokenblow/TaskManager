@@ -21,7 +21,7 @@ public class EmployeesController(IEmployeeService employeeService) : Controller
     {
         try
         {
-            var employees = await employeeService.GetAllAsync();
+            var employees = await employeeService.GetRegularEmployeesAsync();
 
             var indexEmployeesViewModel = new IndexEmployeesViewModel
             {

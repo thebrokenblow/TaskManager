@@ -1,4 +1,4 @@
-﻿using TaskManager.Domain.Entities.Enums;
+﻿using TaskManager.Domain.Enums;
 
 namespace TaskManager.Domain.Entities;
 

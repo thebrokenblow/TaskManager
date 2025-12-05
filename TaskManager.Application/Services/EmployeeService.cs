@@ -1,7 +1,7 @@
 ﻿using TaskManager.Application.Exceptions;
 using TaskManager.Application.Services.Interfaces;
 using TaskManager.Domain.Entities;
-using TaskManager.Domain.Entities.Enums;
+using TaskManager.Domain.Enums;
 using TaskManager.Domain.Model.Employees;
 using TaskManager.Domain.Queries;
 using TaskManager.Domain.Repositories;
@@ -14,9 +14,9 @@ public class EmployeeService(
 {
     private const string DefaultPassword = "Qwerty123";
 
-    public async Task<List<Employee>> GetAllAsync()
+    public async Task<List<Employee>> GetRegularEmployeesAsync()
     {
-        var employee = await employeeRepository.GetAllAsync();
+        var employee = await employeeQuery.GetRegularEmployeesAsync();
 
         return employee;
     }

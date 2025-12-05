@@ -12,8 +12,10 @@ public class GlobalExceptionHandlerMiddleware(RequestDelegate next)
         {
             await next(context);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine(ex.ToString());
+
             var nameAction = nameof(ErrorsController.UnhandledError);
             var nameController = NameController.GetControllerName(nameof(ErrorsController));
 

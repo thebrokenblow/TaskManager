@@ -4,6 +4,7 @@ using TaskManager.Application.Exceptions;
 using TaskManager.Application.Services.Interfaces;
 using TaskManager.Application.Validations;
 using TaskManager.Domain.Entities;
+using TaskManager.Domain.Enums;
 using TaskManager.Domain.Exceptions;
 using TaskManager.Domain.Model.Documents;
 using TaskManager.Domain.Queries;
@@ -24,13 +25,13 @@ public class DocumentService(
 
         int countSkip = (page - 1) * pageSize;
 
-        if (!string.IsNullOrEmpty(inputSearch))
+        if (authService.IsAdmin)
         {
-            (documents, countDocuments) = await documentQuery.SearchDocumentsAsync(inputSearch, countSkip, pageSize);
+            (documents, countDocuments) = await documentQuery.GetDocumentsAsync(inputSearch, countSkip, pageSize, DocumentStatus.Archived);
         }
         else
         {
-            (documents, countDocuments) = await documentQuery.GetDocumentsAsync(countSkip, pageSize);
+            (documents, countDocuments) = await documentQuery.GetDocumentsAsync(inputSearch, countSkip, pageSize, DocumentStatus.Active);
         }
 
         var pagedResult = new PagedResult<DocumentForOverviewModel>(documents, countDocuments, page, pageSize);

@@ -2,7 +2,7 @@
 
 namespace TaskManager.View.Extensions;
 
-public static class MiddlewareExtensions
+public static class MiddlewareExtension
 {
     public static IApplicationBuilder UseGlobalErrorHandling(this IApplicationBuilder app)
     {

@@ -1,4 +1,4 @@
-﻿namespace TaskManager.Domain.Entities.Enums;
+﻿namespace TaskManager.Domain.Enums;
 
 /// <summary>
 /// Словарь ролей пользователей в системе

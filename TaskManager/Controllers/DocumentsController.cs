@@ -4,6 +4,7 @@ using TaskManager.Application.Exceptions;
 using TaskManager.Application.Services.Interfaces;
 using TaskManager.Domain.Entities;
 using TaskManager.Domain.Exceptions;
+using TaskManager.View.Filters;
 using TaskManager.View.Utils;
 using TaskManager.View.ViewModel.Documents;
 using TaskManager.View.ViewModel.Employees;
@@ -117,6 +118,7 @@ public class DocumentsController(
     }
 
     [HttpGet]
+    [OwnerDocumentOrAdmin]
     public async Task<IActionResult> Delete(int id)
     {
         var document = await documentService.GetDocumentForDeleteAsync(id);

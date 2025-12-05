@@ -32,7 +32,7 @@ public class AdminOnlyAttribute : Attribute, IAuthorizationFilter
         if (!authService.IsAdmin)
         {
             var nameController = NameController.GetControllerName(nameof(AccountsController));
-            var actionController = nameof(AccountsController.AccessDenied);
+            var actionController = nameof(ErrorsController.AccessDeniedError);
 
             context.Result = new RedirectToActionResult(actionController, nameController, null);
         }

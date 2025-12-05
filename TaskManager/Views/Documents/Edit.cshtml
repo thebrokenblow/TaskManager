@@ -305,14 +305,14 @@
 
                         <div class="col-12">
                             <div class="d-flex align-items-end gap-4">
-                                <label class="form-label text-nowrap">
+                                <label class="form-label text-nowrap mb-1">
                                     Ответственный сотрудник:
                                 </label>
 
                                 @if (Model.Document.IsCompleted || isDeletedDocuemnt)
                                 {
                                     <select name="IdResponsibleEmployeeInputDocument"
-                                            class="form-control readonly-disabled">
+                                            class="form-control form-control-sm py-1 readonly-disabled">
                                         <option value="">Выберите сотрудника</option>
                                         @foreach (var employee in Model.ResponsibleEmployees)
                                         {
@@ -326,7 +326,7 @@
                                 else
                                 {
                                     <select name="IdResponsibleEmployeeInputDocument"
-                                            class="form-control">
+                                            class="form-control form-control-sm py-1">
                                         <option value="">Выберите сотрудника</option>
                                         @foreach (var employee in Model.ResponsibleEmployees)
                                         {
@@ -484,7 +484,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center gap-4">
                                     <div class="form-check mb-0">
-                                        @if (Model.Document.IsCompleted || isDeletedDocuemnt)
+                                        @if (!isNotReadonly || isDeletedDocuemnt)
                                         {
                                             <input class="form-check-input readonly-disabled"
                                                    type="checkbox"
@@ -492,7 +492,8 @@
                                                    readonly
                                                    disabled>
 
-                                            <input type="hidden" name="IsUnderControl"
+                                            <input type="hidden" 
+                                                   name="IsUnderControl"
                                                    value="@(Model.Document.IsUnderControl ? "true" : "false")" />
                                         }
                                         else
@@ -505,6 +506,7 @@
 
                                             <input type="hidden" name="IsUnderControl" value="false" />
                                         }
+
                                         <label class="form-check-label text-nowrap text-uppercase fw-bold">
                                             На контроле
                                         </label>
@@ -526,9 +528,18 @@
 
                                 <!-- Кнопки действий -->
                                 <div>
-                                    <button type="submit" class="btn btn-primary px-4">
-                                        <i class="fas fa-edit me-2"></i>Сохранить
-                                    </button>
+                                    @if (Model.Document.IsCompleted || isDeletedDocuemnt)
+                                    {
+                                        <button type="submit" class="btn btn-primary px-4 disabled" disabled>
+                                            <i class="fas fa-edit me-2"></i>Сохранить
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-primary px-4">
+                                            <i class="fas fa-edit me-2"></i>Сохранить
+                                        </button>
+                                    }
                                     <a asp-action="Index" class="btn btn-outline-secondary px-4">
                                         <i class="fas fa-arrow-left me-2"></i>Назад к списку
                                     </a>
@@ -546,8 +557,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const isCompleted = @Json.Serialize(Model.Document.IsCompleted);
+            const isDeletedDocuemnt = @Json.Serialize(Model.Document.CreatedByEmployeeId == authService.IdAdmin &&
+                                                Model.Document.RemovedByEmployeeId != null &&
+                                                Model.Document.RemoveDateTime != null);
 
-            if (isCompleted) {
+            if (isCompleted || isDeletedDocuemnt) {
                 return;
             }
 

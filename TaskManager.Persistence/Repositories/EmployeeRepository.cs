@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TaskManager.Domain.Entities;
+using TaskManager.Domain.Enums;
 using TaskManager.Domain.Repositories;
 using TaskManager.Persistence.Data;
 
@@ -7,13 +8,6 @@ namespace TaskManager.Persistence.Repositories;
 
 public class EmployeeRepository(TaskManagerDbContext context) : IEmployeeRepository
 {
-    public async Task<List<Employee>> GetAllAsync()
-    {
-        var employees = await context.Employees.ToListAsync();
-
-        return employees;
-    }
-
     public async Task<Employee?> GetByIdAsync(int id)
     {
         var employee = await context.Employees.FindAsync(id);

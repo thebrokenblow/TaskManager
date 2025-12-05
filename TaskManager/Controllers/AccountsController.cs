@@ -100,12 +100,6 @@ public class AccountsController(
         return RedirectToDocuments();
     }
 
-    [HttpGet]
-    public IActionResult AccessDenied()
-    {
-        return View();
-    }
-
     private RedirectToActionResult RedirectToNotFoundError()
     {
         var nameAction = nameof(ErrorsController.EmployeeNotFoundError);

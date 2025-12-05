@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
-using TaskManager.Domain.Entities.Enums;
+using TaskManager.Domain.Enums;
 using TaskManager.Domain.Model.Employees;
 using TaskManager.Domain.Repositories;
 using TaskManager.Domain.Services;
-using TaskManager.View.ViewModel.Employees;
 
 namespace TaskManager.View.Services;
 
@@ -14,13 +13,13 @@ public class AuthService(
     IHttpContextAccessor httpContextAccessor) : IAuthService
 {
     public bool IsAuthenticated =>
-        _httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
+        httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
 
     public bool IsAdmin =>
-        _httpContextAccessor.HttpContext?.User.IsInRole(RolesDictionary.Admin.ToString()) ?? false;
+        httpContextAccessor.HttpContext?.User.IsInRole(RolesDictionary.Admin.ToString()) ?? false;
 
     public string? FullName =>
-       _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value.ToString();
+       httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value.ToString();
 
     public int IdAdmin => 1;
 
@@ -28,7 +27,7 @@ public class AuthService(
     {
         get
         {
-            var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier);
+            var userIdClaim = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier);
 
             if (userIdClaim is not null)
             {
@@ -39,27 +38,11 @@ public class AuthService(
         }
     }
 
-    private readonly IEmployeeRepository _employeeRepository = employeeRepository ??
-            throw new ArgumentNullException(nameof(employeeRepository), "userRepository is null");
-
-    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor ??
-            throw new ArgumentNullException(nameof(httpContextAccessor), "httpContextAccessor is null");
-
     public async Task<bool> LoginAsync(EmployeeLoginModel loginViewModel)
     {
-        var user = await _employeeRepository.GetByLoginAsync(loginViewModel.Login);
+        var user = await employeeRepository.GetByLoginAsync(loginViewModel.Login);
 
-        if (user == null)
-        {
-            return false;
-        }
-
-        if (user.Login != loginViewModel.Login)
-        {
-            return false;
-        }
-
-        if (user.Password != loginViewModel.Password)
+        if (user == null || user.Login != loginViewModel.Login || user.Password != loginViewModel.Password)
         {
             return false;
         }
@@ -79,16 +62,16 @@ public class AuthService(
             ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
         };
 
-        await _httpContextAccessor.HttpContext!.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity),
-                authProperties);
+        await httpContextAccessor.HttpContext!.SignInAsync(
+               CookieAuthenticationDefaults.AuthenticationScheme,
+               new ClaimsPrincipal(claimsIdentity),
+               authProperties);
 
         return true;
     }
 
     public async Task LogoutAsync()
     {
-        await _httpContextAccessor.HttpContext!.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        await httpContextAccessor.HttpContext!.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     }
 }

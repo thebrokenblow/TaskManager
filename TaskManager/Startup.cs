@@ -2,7 +2,7 @@
 using TaskManager.Application;
 using TaskManager.Domain.Services;
 using TaskManager.Persistence;
-using TaskManager.View.Configurations;
+using TaskManager.View.Extensions;
 using TaskManager.View.Middlewares;
 using TaskManager.View.Services;
 using TaskManager.View.Utils;
@@ -16,10 +16,10 @@ public class Startup(IConfiguration configuration)
         services.AddHttpContextAccessor();
         services.AddControllersWithViews();
 
-        services.AddScoped<DocumentStyler>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<DocumentStyler>();
 
-        AuthenticationConfiguration.ConfigureAuthentication(services);
+        services.ConfigureAuthentication();
 
         services.AddAuthorization();
         services.AddApplication();
@@ -37,7 +37,7 @@ public class Startup(IConfiguration configuration)
             app.UseExceptionHandler("/Home/Error");
             app.UseHsts();
         }
-
+        
         app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
         app.UseHttpsRedirection();

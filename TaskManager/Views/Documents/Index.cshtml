@@ -1,4 +1,5 @@
-﻿@using TaskManager.Domain.Model
+﻿@using TaskManager.Application.Common
+@using TaskManager.Domain.Model
 @using TaskManager.Domain.Model.Documents
 @using TaskManager.Domain.Services
 @using TaskManager.View.Utils
@@ -158,7 +159,7 @@
                                                             </form>
                                                         }
 
-                                                        @if (documentStyler.IsDeletedDocument(document) && authService.IdAdmin == authService.IdCurrentUser)
+                                                        @if (documentStyler.IsDeletedDocument(document) && authService.IsAdmin)
                                                         {
                                                             <form asp-action="RecoverDeleted" method="post" class="d-inline">
                                                                 <input type="hidden" name="id" value="@document.Id" />
@@ -168,8 +169,8 @@
                                                             </form>
                                                         }
 
-                                                        @if (document.CreatedByEmployeeId == authService.IdCurrentUser || 
-                                                            authService.IdAdmin == authService.IdCurrentUser)
+                                                             @*Проверка на владельца записи*@
+                                                        @if (document.CreatedByEmployeeId == authService.IdCurrentUser || authService.IsAdmin)
                                                         {
                                                             <a asp-action="Delete" asp-route-id="@document.Id"
                                                                class="btn btn-outline-danger btn-sm" title="Удалить">
@@ -196,7 +197,7 @@
                 <div class="col-12">
                     <nav aria-label="Page navigation">
                         <ul class="pagination justify-content-center mb-0">
-                            <li class="page-item @(!Model.PagedDocuments.HasPreviousPage ? ButtonStatesCssClassDictionary.Disabled : string.Empty)">
+                            <li class="page-item @GetAtributePreviousPage(Model.PagedDocuments)">
                                 <a class="page-link"
                                    asp-action="Index"
                                    asp-route-inputSearch="@Model.InputString"
@@ -208,7 +209,7 @@
 
                             @for (int pageNumber = 1; pageNumber <= Model.PagedDocuments.TotalPages; pageNumber++)
                             {
-                                <li class="page-item @(pageNumber == Model.PagedDocuments.PageNumber ? ButtonStatesCssClassDictionary.Active : string.Empty)">
+                                <li class="page-item @GetAtributeCurrentPage(Model.PagedDocuments, pageNumber)">
                                     <a class="page-link"
                                        asp-action="Index"
                                        asp-route-inputSearch="@Model.InputString"
@@ -217,7 +218,7 @@
                                 </li>
                             }
 
-                            <li class="page-item @(!Model.PagedDocuments.HasNextPage ? ButtonStatesCssClassDictionary.Disabled : string.Empty)">
+                            <li class="page-item @GetAtributeNextPage(Model.PagedDocuments)">
                                 <a class="page-link"
                                    asp-action="Index"
                                    asp-route-inputSearch="@Model.InputString"
@@ -247,3 +248,36 @@
         </div>
     }
 </div>
+
+
+@functions {
+    private string GetAtributePreviousPage<T>(PagedResult<T> pagedResult)
+    {
+        if (!pagedResult.HasPreviousPage)
+        {
+            return ButtonStatesCssClassDictionary.Disabled;
+        }
+
+        return string.Empty;
+    }
+
+    private string GetAtributeCurrentPage<T>(PagedResult<T> pagedResult, int pageNumber)
+    {
+        if (Model.PagedDocuments.PageNumber == pageNumber)
+        {
+            return ButtonStatesCssClassDictionary.Active;
+        }
+
+        return string.Empty;
+    }
+
+    private string GetAtributeNextPage<T>(PagedResult<T> pagedResult)
+    {
+        if (!pagedResult.HasNextPage)
+        {
+            return  ButtonStatesCssClassDictionary.Disabled;
+        }
+
+        return string.Empty;
+    }
+}

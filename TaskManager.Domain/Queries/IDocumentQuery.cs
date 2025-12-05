@@ -1,4 +1,4 @@
-﻿using TaskManager.Domain.Entities;
+﻿using TaskManager.Domain.Enums;
 using TaskManager.Domain.Model.Documents;
 
 namespace TaskManager.Domain.Queries;
@@ -6,17 +6,16 @@ namespace TaskManager.Domain.Queries;
 public interface IDocumentQuery
 {
     Task<(List<DocumentForOverviewModel> documents, int countDocuments)> GetDocumentsAsync(
+        string? searchTerm,
         int countSkip,
-        int countTake);
-
-    Task<(List<DocumentForOverviewModel> documents, int countDocuments)> SearchDocumentsAsync(
-        string searchTerm,
-        int countSkip,
-        int countTake);
+        int countTake,
+        DocumentStatus documentStatus);
 
     Task<DocumentForEditModel?> GetDocumentForEditAsync(int id);
 
     Task<DocumentForDeleteModel?> GetDocumentForDeleteAsync(int id);
+
+    Task<int?> GetIdEmployeeCreatedAsync(int id);
 
     Task<int?> GetIdEmployeeRemovedAsync(int id);
 

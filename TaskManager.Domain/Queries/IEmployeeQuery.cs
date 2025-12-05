@@ -5,5 +5,6 @@ namespace TaskManager.Domain.Queries;
 
 public interface IEmployeeQuery
 {
+    Task<List<Employee>> GetRegularEmployeesAsync();
     Task<List<EmployeeSelectModel>> GetResponsibleEmployeesAsync();
 }

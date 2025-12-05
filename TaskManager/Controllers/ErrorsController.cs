@@ -21,4 +21,10 @@ public class ErrorsController : Controller
     {
         return View();
     }
+
+    [HttpGet]
+    public IActionResult AccessDeniedError()
+    {
+        return View();
+    }
 }
